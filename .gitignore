@@ -10,3 +10,4 @@ data/processed/*.csv
 data/processed/*.json
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+*.draft.md
