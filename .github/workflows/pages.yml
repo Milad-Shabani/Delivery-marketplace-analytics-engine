@@ -1,10 +1,8 @@
-name: pages
+name: Deploy dashboard to Pages
 
 on:
   push:
     branches: [main]
-    paths:
-      - "dashboard/**"
   workflow_dispatch:
 
 permissions:
@@ -13,23 +11,31 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload dashboard
-        uses: actions/upload-pages-artifact@v3
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp -r 
+dashboard
+/. _site/
+          if [  actions/configure-pages@v5
         with:
-          path: dashboard
-      - name: Deploy to GitHub Pages
-        id: deployment
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
         uses: actions/deploy-pages@v4
