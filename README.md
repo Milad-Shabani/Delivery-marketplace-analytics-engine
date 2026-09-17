@@ -10,8 +10,8 @@
 > not use data from, Snapfood, SnappFood, DoorDash, Uber Eats, Deliveroo, or
 > any real company.
 
-![Dashboard preview](docs/screenshots/dashboard_preview.png)
-*Faithful preview render generated from the project's own data pipeline (see [Dashboard preview](#dashboard-preview) below) — open `dashboard/index.html` for the live, interactive version.*
+![Dashboard preview](docs/screenshots/section_1_overview.png)
+*Faithful preview render generated from the project's own data pipeline (see [Dashboard Preview](#dashboard-preview) below for all 7 sections) — open `dashboard/index.html` for the live, interactive version.*
 
 ## Executive Summary
 
@@ -160,12 +160,54 @@ See [`docs/optimization_methodology.md`](docs/optimization_methodology.md).
 ## Dashboard Preview
 
 No live browser is available in this build environment to capture an actual
-screenshot, so `docs/screenshots/make_preview.py` composes a preview image
-from the *same real pipeline output* (matplotlib) — it's a faithful render of
-the real numbers, not a mockup. Open `dashboard/index.html` for the live,
-interactive Plotly version with all 7 sections (Executive Overview,
-Financial, Customers & Retention, Restaurants, Operations, Forecast &
-Planning, Scenario & Optimization).
+screenshot, so `docs/screenshots/make_preview.py` composes preview images
+from the **same real pipeline output** (matplotlib, not a mockup) — one per
+dashboard section. Open `dashboard/index.html` for the live, interactive
+Plotly version (hover tooltips, a searchable cohort heatmap, and a
+scroll-spy nav across all 7 sections).
+
+### 1. Executive Overview
+![Executive Overview](docs/screenshots/section_1_overview.png)
+Trailing-month KPI band (GMV, delivered orders, contribution margin, active
+customers, on-time rate), the GMV trend by month, and contribution profit by
+city — the first read on whether growth is happening *profitably*, and where.
+
+### 2. Financial Performance
+![Financial Performance](docs/screenshots/section_2_financial.png)
+The contribution-margin trend, the trailing-quarter revenue mix (commission /
+delivery fee / service fee), and the margin-driver decomposition — which
+levers (discount rate, rider cost, payment processing, refunds, take-rate)
+moved margin between the first and latest month.
+
+### 3. Customers & Retention
+![Customers & Retention](docs/screenshots/section_3_customers.png)
+Customer mix by rule-based segment, LTV:CAC by acquisition channel, and a
+monthly cohort-retention heatmap — Organic/Referral and Push/CRM clearly
+outperform paid channels on LTV:CAC here.
+
+### 4. Restaurant Performance
+![Restaurant Performance](docs/screenshots/section_4_restaurants.png)
+Every restaurant plotted on revenue vs. contribution margin, classified into
+four quadrants (Star / Volume Trap / Niche Profit / Review) — the basis for
+the commission/delivery-cost renegotiation recommendation below.
+
+### 5. Delivery Operations
+![Delivery Operations](docs/screenshots/section_5_operations.png)
+On-time delivery rate and cancellation rate by month — the service-level
+story behind the financial numbers.
+
+### 6. Forecast & Strategic Planning
+![Forecast & Strategic Planning](docs/screenshots/section_6_forecast.png)
+The 12-month delivered-orders forecast (history, point forecast, 80%
+interval) from the rolling-origin-validated Holt-Winters model, next to the
+current-vs-target figures for the "+25% orders / +2pp margin" executive plan.
+
+### 7. Scenario & Optimization
+![Scenario & Optimization](docs/screenshots/section_7_optimization.png)
+Base/Upside/Downside contribution-profit scenarios, and the promotion-budget
+reallocation across the top city × segment cells (baseline even-split vs.
+the SciPy-optimized allocation).
+
 
 ## Key Findings
 
