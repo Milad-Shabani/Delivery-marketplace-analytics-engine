@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVAFOOD — Business Intelligence Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2/plotly.min.js"></script>
+<style>
+  :root{
+    --navy:#1f2a44; --navy-2:#2c3a5e; --teal:#0f7c82; --teal-l:#e5f4f4;
+    --ink:#1a2233; --muted:#6b7280; --border:#e6e8ee; --bg:#ffffff; --card:#ffffff;
+    --amber:#e08a2b; --red:#c94b4b; --green:#1f8b5b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--teal)}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 24px;}
+  header.hero{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;padding:38px 0 30px;}
+  header.hero .eyebrow{opacity:.75;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  header.hero h1{margin:0 0 6px;font-size:30px;font-weight:800}
+  header.hero p.sub{margin:0;opacity:.85;font-size:15px;max-width:760px;line-height:1.5}
+  nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:20;}
+  nav .navlist{display:flex;gap:2px;overflow-x:auto;padding:0 24px;max-width:1240px;margin:0 auto;}
+  nav a{white-space:nowrap;padding:12px 14px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;}
+  nav a.active,nav a:hover{color:var(--navy);border-bottom-color:var(--teal)}
+  section{padding:36px 0;border-bottom:1px solid var(--border);}
+  section h2{font-size:20px;margin:0 0 4px;color:var(--navy)}
+  section p.desc{margin:0 0 20px;color:var(--muted);font-size:14px;max-width:820px}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .kpi .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:8px}
+  .kpi .value{font-size:24px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+  .kpi .delta{font-size:12.5px;margin-top:4px;font-weight:600}
+  .up{color:var(--green)} .down{color:var(--red)}
+  .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px 6px;}
+  .card h3{font-size:14px;margin:0 0 8px;color:var(--navy)}
+  .insight{background:var(--teal-l);border:1px solid #cfe9e9;border-left:4px solid var(--teal);border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;margin-bottom:18px}
+  .insight b{color:var(--navy)}
+  table.simple{width:100%;border-collapse:collapse;font-size:13px}
+  table.simple th{text-align:left;color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding:6px 8px}
+  table.simple td{padding:7px 8px;border-bottom:1px solid #f1f2f5}
+  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
+  .tag.star{background:#e3f6ea;color:var(--green)}
+  .tag.volume{background:#fdece4;color:var(--amber)}
+  .tag.niche{background:#eaf1fc;color:#2f5fb3}
+  .tag.review{background:#fbe9e9;color:var(--red)}
+  footer{padding:34px 0 60px}
+  .maker-card{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:12px;padding:16px 20px;max-width:560px}
+  .maker-card .avatar{width:56px;height:56px;border-radius:50%;flex:none;object-fit:cover;border:1px solid var(--border)}
+  .maker-card .name{font-weight:800;color:var(--navy);font-size:15px}
+  .maker-card .role{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .maker-card a{font-size:12.5px}
+  .foot-note{color:var(--muted);font-size:12px;margin-top:14px}
+  .badge-scroll{overflow-x:auto}
+  @media (max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Business Analytics &middot; Financial Planning &middot; Demand Forecasting &middot; Optimization</div>
+    <h1>NOVAFOOD — Business Intelligence Dashboard</h1>
+    <p class="sub">A synthetic online food-delivery marketplace case study: from order-level data to a management decision on growth vs. contribution margin. Not affiliated with any real company — see the Sources section for methodology.</p>
+  </div>
+</header>
+
+<nav><div class="navlist" id="navlist">
+  <a href="#overview">Executive Overview</a>
+  <a href="#financial">Financial</a>
+  <a href="#customers">Customers &amp; Retention</a>
+  <a href="#restaurants">Restaurants</a>
+  <a href="#operations">Operations</a>
+  <a href="#forecast">Forecast &amp; Planning</a>
+  <a href="#optimization">Scenario &amp; Optimization</a>
+  <a href="#sources">Sources</a>
+</div></nav>
+
+<div class="wrap">
+
+<section id="overview">
+  <h2>Executive Overview</h2>
+  <p class="desc">Are we growing profitably? Trailing-month marketplace KPIs and the underlying order/GMV trend.</p>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div id="insight-overview" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>GMV &amp; Delivered Orders by Month</h3><div id="chart-overview-trend" style="height:340px"></div></div>
+    <div class="card"><h3>Contribution Profit by City</h3><div id="chart-overview-city" style="height:340px"></div></div>
+  </div>
+</section>
+
+<section id="financial">
+  <h2>Financial Performance</h2>
+  <p class="desc">Marketplace P&amp;L: GMV → net customer spend → platform revenue → contribution profit, plus the cost structure behind the trend.</p>
+  <div id="insight-financial" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>Contribution Margin % Trend</h3><div id="chart-margin-trend" style="height:320px"></div></div>
+    <div class="card"><h3>Revenue Mix (Trailing 3 Months)</h3><div id="chart-revenue-mix" style="height:320px"></div></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>Cost Structure vs. Platform Revenue</h3><div id="chart-cost-structure" style="height:320px"></div></div>
+    <div class="card"><h3>Margin Driver Decomposition (First vs. Latest Month)</h3><div id="chart-drivers" style="height:320px"></div></div>
+  </div>
+</section>
+
+<section id="customers">
+  <h2>Customers &amp; Retention</h2>
+  <p class="desc">Segments, acquisition-channel efficiency (LTV:CAC), and monthly cohort retention.</p>
+  <div id="insight-customers" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>Customers by Segment</h3><div id="chart-segments" style="height:320px"></div></div>
+    <div class="card"><h3>LTV : CAC by Acquisition Channel</h3><div id="chart-ltv-cac" style="height:320px"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Cohort Retention Heatmap (% still ordering, by months since signup)</h3><div id="chart-cohort" style="height:380px"></div></div>
+</section>
+
+<section id="restaurants">
+  <h2>Restaurant Performance</h2>
+  <p class="desc">Which restaurants drive GMV but not profit? A revenue-vs-margin quadrant view.</p>
+  <div id="insight-restaurants" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>Revenue vs. Contribution Margin (each dot = 1 restaurant)</h3><div id="chart-quadrant" style="height:380px"></div></div>
+    <div class="card"><h3>Restaurant Count by Quadrant</h3><div id="chart-quadrant-bar" style="height:380px"></div></div>
+  </div>
+</section>
+
+<section id="operations">
+  <h2>Delivery Operations</h2>
+  <p class="desc">Service levels behind the financial numbers: on-time delivery and cancellation rate by month.</p>
+  <div class="grid2">
+    <div class="card"><h3>On-Time Delivery Rate</h3><div id="chart-ontime" style="height:320px"></div></div>
+    <div class="card"><h3>Cancellation Rate</h3><div id="chart-cancel" style="height:320px"></div></div>
+  </div>
+</section>
+
+<section id="forecast">
+  <h2>Forecast &amp; Strategic Planning</h2>
+  <p class="desc">12-month demand forecast (rolling-origin model selection) and the executive growth-vs-margin plan.</p>
+  <div id="insight-forecast" class="insight"></div>
+  <div class="card"><h3>Delivered Orders — History, Forecast &amp; 80% Interval</h3><div id="chart-forecast" style="height:380px"></div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>Model Selection (rolling-origin validation, WAPE)</h3><div id="table-models"></div></div>
+    <div class="card"><h3>Strategic Plan: +25% Orders, +2pp Margin</h3><div id="plan-box" style="padding:8px 4px 14px;font-size:13.5px;line-height:1.6"></div></div>
+  </div>
+</section>
+
+<section id="optimization">
+  <h2>Scenario &amp; Promotion-Budget Optimization</h2>
+  <p class="desc">Base / Upside / Downside contribution-profit scenarios, and a SciPy-optimized promo-budget re-allocation across city × segment cells.</p>
+  <div class="grid2">
+    <div class="card"><h3>Scenario Cases — Contribution Profit</h3><div id="chart-scenario" style="height:320px"></div></div>
+    <div class="card"><h3>Optimization: Baseline vs. Optimized Spend (Top Cells)</h3><div id="chart-optimization" style="height:320px"></div></div>
+  </div>
+  <div class="insight" id="opt-summary" style="margin-top:16px"></div>
+</section>
+
+<section id="sources">
+  <h2>Sources &amp; Methodology</h2>
+  <p class="desc">This project uses synthetic data designed to simulate realistic food-delivery marketplace economics. It is not affiliated with or based on confidential or real data from any real company (Snapfood, DoorDash, Uber Eats, Deliveroo, or otherwise).</p>
+  <table class="simple">
+    <tr><th>Component</th><th>Approach</th></tr>
+    <tr><td>Data generation</td><td>Reproducible NumPy/pandas simulation (fixed seed) of ~12,000 customers, 320 restaurants, 520 riders, ~167k orders over 17 months, with seasonality, growth trend, churn/retention curves, and realistic financial relationships.</td></tr>
+    <tr><td>Forecasting</td><td>Seasonal-naive, moving-average, and Holt-Winters models compared via rolling-origin (temporal) validation; best model selected per metric by WAPE.</td></tr>
+    <tr><td>Optimization</td><td>SciPy trust-constr solves a concave-response promotion-budget allocation across city × segment cells, maximizing incremental contribution profit under a fixed budget.</td></tr>
+    <tr><td>Segmentation</td><td>Rule-based on realized recency / frequency / monetary value and subscription status — not random labels.</td></tr>
+  </table>
+  <div class="foot-note" id="generated-at"></div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="maker-card">
+      <img class="avatar" src="assets/milad-shabani.jpg" alt="Milad Shabani">
+      <div>
+        <div class="name">Milad Shabani</div>
+        <div class="role">Business Intelligence | Data Analytics | Data Engineering</div>
+        <a href="https://miladshabani.ir" target="_blank" rel="noopener">miladshabani.ir</a> · <a href="https://github.com/Milad-Shabani" target="_blank" rel="noopener">github.com/Milad-Shabani</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="data/novafood_data.js"></script>
+<script>
+const D = window.NOVAFOOD_DATA;
+const NAVY = "#1f2a44", TEAL = "#0f7c82", AMBER="#e08a2b", RED="#c94b4b", GREEN="#1f8b5b", MUTED="#9aa3b2";
+const PALETTE = [TEAL, NAVY, AMBER, GREEN, RED, "#7c6fd6", "#3f8fd6", "#c98bd6"];
+const layoutBase = {
+  font:{family:"-apple-system,Segoe UI,Roboto,Arial,sans-serif", color:"#1a2233", size:12},
+  margin:{l:50,r:20,t:10,b:40}, paper_bgcolor:"#fff", plot_bgcolor:"#fff",
+  legend:{orientation:"h", y:-0.2}, hovermode:"x unified"
+};
+const cfg = {displayModeBar:false, responsive:true};
+
+function fmtMoney(v){ if(v==null) return "-"; return "$"+Number(v).toLocaleString(undefined,{maximumFractionDigits:0}); }
+function fmtNum(v){ if(v==null) return "-"; return Number(v).toLocaleString(); }
+
+// ---------- KPI cards ----------
+const k = D.kpis;
+const kpiDefs = [
+  ["GMV (trailing month)", fmtMoney(k.gmv), k.gmv_growth_pct!=null ? (k.gmv_growth_pct>=0?"up":"down") : null, k.gmv_growth_pct!=null? (k.gmv_growth_pct>=0?"▲ ":"▼ ")+Math.abs(k.gmv_growth_pct)+"% MoM":""],
+  ["Delivered Orders", fmtNum(k.orders), null, "Annualized growth ~"+k.orders_growth_annualized_pct+"%"],
+  ["Contribution Margin %", k.contribution_margin_pct+"%", null, "Trailing 3-month average"],
+  ["Active Customers", fmtNum(k.active_customers), null, "Trailing month"],
+  ["Platform Revenue", fmtMoney(k.revenue), null, "Trailing month"],
+  ["Contribution Profit", fmtMoney(k.contribution_profit), null, "Trailing month"],
+  ["Average Order Value", fmtMoney(k.aov), null, "Trailing month"],
+  ["On-Time Delivery Rate", k.on_time_rate+"%", null, "Trailing month"],
+];
+document.getElementById("kpi-grid").innerHTML = kpiDefs.map(([label,val,cls,delta])=>`
+  <div class="kpi"><div class="label">${label}</div><div class="value">${val}</div>${delta?`<div class="delta ${cls||''}">${delta}</div>`:""}</div>
+`).join("");
+
+document.getElementById("insight-overview").innerHTML =
+  `<b>Read:</b> NOVAFOOD is growing orders at roughly <b>${k.orders_growth_annualized_pct}% annualized</b> while holding contribution margin near <b>${k.contribution_margin_pct}%</b> — the central management question is whether that margin holds as growth continues. ${D.findings.highest_margin_city.city} runs the strongest unit economics (${D.findings.highest_margin_city.contribution_margin_pct}% margin); ${D.findings.weakest_margin_city.city} is the priority market for review (${D.findings.weakest_margin_city.contribution_margin_pct}% margin).`;
+
+// ---------- Overview trend ----------
+Plotly.newPlot("chart-overview-trend", [
+  {x:D.financial.months, y:D.financial.gmv, type:"bar", name:"GMV ($)", marker:{color:TEAL, opacity:.85}},
+  {x:D.financial.months, y:D.financial.delivered_orders, type:"scatter", mode:"lines+markers", name:"Delivered Orders", yaxis:"y2", line:{color:NAVY,width:3}}
+], {...layoutBase, yaxis:{title:"GMV ($)"}, yaxis2:{title:"Orders", overlaying:"y", side:"right", showgrid:false}}, cfg);
+
+Plotly.newPlot("chart-overview-city", [{
+  x:D.cities.contribution_profit, y:D.cities.names, type:"bar", orientation:"h",
+  marker:{color:D.cities.contribution_profit.map(v=>v>=0?GREEN:RED)},
+}], {...layoutBase, xaxis:{title:"Contribution Profit ($, period total)"}, margin:{l:120,r:20,t:10,b:40}}, cfg);
+
+// ---------- Financial ----------
+const marginLatest = D.financial.contribution_margin_pct.at(-1);
+const marginFirst = D.financial.contribution_margin_pct[0];
+document.getElementById("insight-financial").innerHTML =
+  `<b>Read:</b> Contribution margin moved from <b>${marginFirst}%</b> to <b>${marginLatest}%</b> across the reporting window. The driver chart below shows an approximate first-order decomposition of that change — discount rate, delivery (rider) cost rate, payment processing, refunds, and take-rate/mix.`;
+
+Plotly.newPlot("chart-margin-trend", [{
+  x:D.financial.months, y:D.financial.contribution_margin_pct, type:"scatter", mode:"lines+markers", line:{color:TEAL,width:3}, fill:"tozeroy", fillcolor:"rgba(15,124,130,0.08)"
+}], {...layoutBase, yaxis:{title:"Contribution Margin %", ticksuffix:"%"}}, cfg);
+
+const last3 = {
+  commission: D.financial.commission_revenue.slice(-3).reduce((a,b)=>a+b,0),
+  delivery: D.financial.delivery_fee_collected.slice(-3).reduce((a,b)=>a+b,0),
+  service: D.financial.service_fee_revenue.slice(-3).reduce((a,b)=>a+b,0),
+};
+Plotly.newPlot("chart-revenue-mix", [{
+  labels:["Commission Revenue","Delivery Fee Revenue","Service Fee Revenue"],
+  values:[last3.commission,last3.delivery,last3.service],
+  type:"pie", hole:.55, marker:{colors:[NAVY,TEAL,AMBER]}, textinfo:"label+percent"
+}], {...layoutBase, showlegend:false}, cfg);
+
+Plotly.newPlot("chart-cost-structure", [
+  {x:D.financial.months, y:D.financial.rider_cost, type:"bar", name:"Rider Cost", marker:{color:NAVY}},
+  {x:D.financial.months, y:D.financial.payment_processing_cost, type:"bar", name:"Payment Processing", marker:{color:AMBER}},
+  {x:D.financial.months, y:D.financial.promotion_cost, type:"bar", name:"Promotion/Discount", marker:{color:TEAL}},
+  {x:D.financial.months, y:D.financial.refund_amount, type:"bar", name:"Refunds", marker:{color:RED}},
+], {...layoutBase, barmode:"stack", yaxis:{title:"$ per month"}}, cfg);
+
+Plotly.newPlot("chart-drivers", [{
+  x:D.drivers.values, y:D.drivers.labels, type:"bar", orientation:"h",
+  marker:{color:D.drivers.values.map(v=>v>=0?GREEN:RED)}
+}], {...layoutBase, xaxis:{title:"Approx. margin impact (pp)"}, margin:{l:230,r:20,t:10,b:40}}, cfg);
+
+// ---------- Customers ----------
+document.getElementById("insight-customers").innerHTML =
+  `<b>Read:</b> ${D.findings.best_ltv_cac_channel.channel} delivers the strongest LTV:CAC (${D.findings.best_ltv_cac_channel.ltv_to_cac}x) — a candidate for incremental acquisition spend. Average month-1 cohort retention runs ~${D.cohorts.m1_retention_avg}%, settling near ~${D.cohorts.m3_retention_avg}% by month 3.`;
+
+Plotly.newPlot("chart-segments", [{
+  labels:D.segments.names, values:D.segments.customer_counts, type:"pie", hole:.5,
+  marker:{colors:PALETTE}, textinfo:"label+value"
+}], {...layoutBase, showlegend:false}, cfg);
+
+Plotly.newPlot("chart-ltv-cac", [{
+  x:D.channels.names, y:D.channels.ltv_to_cac, type:"bar",
+  marker:{color:D.channels.ltv_to_cac.map(v=>v>=3?GREEN:(v>=1.5?AMBER:RED))},
+  text:D.channels.ltv_to_cac.map(v=>v.toFixed(2)+"x"), textposition:"outside"
+}], {...layoutBase, yaxis:{title:"LTV : CAC"}}, cfg);
+
+Plotly.newPlot("chart-cohort", [{
+  z:D.cohorts.matrix, x:D.cohorts.month_numbers.map(m=>"M"+m), y:D.cohorts.cohort_labels,
+  type:"heatmap", colorscale:[[0,"#fbe9e9"],[0.5,"#fff3d6"],[1,"#e3f6ea"]], hoverongaps:false,
+  colorbar:{title:"%"}
+}], {...layoutBase, margin:{l:80,r:20,t:10,b:40}}, cfg);
+
+// ---------- Restaurants ----------
+const quadColor = {
+  "Star: High Revenue / High Margin": GREEN,
+  "Volume Trap: High Revenue / Low Margin": AMBER,
+  "Niche Profit: Low Revenue / High Margin": TEAL,
+  "Review: Low Revenue / Low Margin": RED,
+};
+document.getElementById("insight-restaurants").innerHTML =
+  `<b>Read:</b> <b>Stars</b> (high revenue, high margin) should get marketing priority; <b>Volume Traps</b> drive GMV but erode margin and are candidates for commission or delivery-cost renegotiation; <b>Niche Profit</b> restaurants are small but efficient; <b>Review</b> restaurants underperform on both axes.`;
+
+const rq = D.restaurants.scatter;
+const quadTraces = [...new Set(rq.quadrant)].map(q => ({
+  x: rq.gmv.filter((_,i)=>rq.quadrant[i]===q),
+  y: rq.margin_pct.filter((_,i)=>rq.quadrant[i]===q),
+  text: rq.name.filter((_,i)=>rq.quadrant[i]===q),
+  mode:"markers", type:"scatter", name:q.split(":")[0], marker:{color:quadColor[q]||MUTED, size:7, opacity:.75}
+}));
+Plotly.newPlot("chart-quadrant", quadTraces, {...layoutBase, xaxis:{title:"Monthly GMV ($)"}, yaxis:{title:"Margin %"}}, cfg);
+
+Plotly.newPlot("chart-quadrant-bar", [{
+  x:D.restaurants.quadrant_counts, y:D.restaurants.quadrant_labels.map(q=>q.split(":")[0]), type:"bar", orientation:"h",
+  marker:{color:D.restaurants.quadrant_labels.map(q=>quadColor[q]||MUTED)}
+}], {...layoutBase, margin:{l:110,r:20,t:10,b:40}}, cfg);
+
+// ---------- Operations ----------
+Plotly.newPlot("chart-ontime", [{
+  x:D.financial.months, y:D.financial.on_time_rate, type:"scatter", mode:"lines+markers", line:{color:GREEN,width:3}
+}], {...layoutBase, yaxis:{title:"%", range:[0,100]}}, cfg);
+
+Plotly.newPlot("chart-cancel", [{
+  x:D.financial.months, y:D.financial.cancellation_rate, type:"scatter", mode:"lines+markers", line:{color:RED,width:3}
+}], {...layoutBase, yaxis:{title:"%"}}, cfg);
+
+// ---------- Forecast ----------
+const fo = D.forecast.metrics.delivered_orders;
+const hist = D.forecast.history_orders;
+document.getElementById("insight-forecast").innerHTML =
+  `<b>Read:</b> The <b>${D.forecast.model_selection.delivered_orders.replace("_"," ")}</b> model was selected for orders (lowest rolling-origin WAPE). Base-case orders reach ~${fmtNum(Math.round(fo.point_forecast.at(-1)))} by the end of the forecast horizon.`;
+
+Plotly.newPlot("chart-forecast", [
+  {x:hist.months, y:hist.values, type:"scatter", mode:"lines", name:"Actuals", line:{color:NAVY,width:3}},
+  {x:fo.months, y:fo.upper_80, type:"scatter", mode:"lines", name:"80% Upper", line:{width:0}, showlegend:false},
+  {x:fo.months, y:fo.lower_80, type:"scatter", mode:"lines", name:"80% Interval", fill:"tonexty", fillcolor:"rgba(15,124,130,0.15)", line:{width:0}},
+  {x:fo.months, y:fo.point_forecast, type:"scatter", mode:"lines+markers", name:"Forecast (Base)", line:{color:TEAL,width:3,dash:"dot"}},
+], {...layoutBase, yaxis:{title:"Delivered Orders"}}, cfg);
+
+const modelRows = Object.entries(D.forecast.validation).map(([metric,rows])=>{
+  const best = rows[0];
+  return `<tr><td>${metric.replace(/_/g," ")}</td><td>${best.model.replace("_"," ")}</td><td>${(best.wape*100).toFixed(1)}%</td><td>${(best.mape*100).toFixed(1)}%</td></tr>`;
+}).join("");
+document.getElementById("table-models").innerHTML = `<table class="simple"><tr><th>Metric</th><th>Selected Model</th><th>WAPE</th><th>MAPE</th></tr>${modelRows}</table>`;
+
+const p = D.plan;
+document.getElementById("plan-box").innerHTML = `
+  <p><b>Verdict:</b> ${p.verdict}</p>
+  <table class="simple">
+    <tr><td>Current annualized orders</td><td>${fmtNum(Math.round(p.current_orders_annualized))}</td></tr>
+    <tr><td>Target annualized orders (+25%)</td><td>${fmtNum(Math.round(p.required_orders_annualized))}</td></tr>
+    <tr><td>Current contribution margin</td><td>${p.current_margin_pct}%</td></tr>
+    <tr><td>Target contribution margin (+2pp)</td><td>${p.required_margin_pct}%</td></tr>
+  </table>`;
+
+// ---------- Optimization ----------
+const scnP = D.forecast.metrics.contribution_profit;
+Plotly.newPlot("chart-scenario", [
+  {x:scnP.months, y:scnP.downside_case, type:"scatter", mode:"lines", name:"Downside", line:{color:RED,dash:"dot"}},
+  {x:scnP.months, y:scnP.base_case, type:"scatter", mode:"lines", name:"Base", line:{color:NAVY,width:3}},
+  {x:scnP.months, y:scnP.upside_case, type:"scatter", mode:"lines", name:"Upside", line:{color:GREEN,dash:"dot"}},
+], {...layoutBase, yaxis:{title:"Contribution Profit ($)"}}, cfg);
+
+const oc = D.optimization.cells;
+Plotly.newPlot("chart-optimization", [
+  {x:oc.labels, y:oc.baseline_spend, type:"bar", name:"Baseline (even split)", marker:{color:MUTED}},
+  {x:oc.labels, y:oc.optimized_spend, type:"bar", name:"Optimized", marker:{color:TEAL}},
+], {...layoutBase, barmode:"group", xaxis:{tickangle:-35}, margin:{l:50,r:20,t:10,b:120}}, cfg);
+
+const os_ = D.optimization.summary;
+document.getElementById("opt-summary").innerHTML =
+  `<b>Read:</b> Re-allocating the same monthly promotion budget (~${fmtMoney(os_.total_budget)}) toward higher-response city × segment cells lifts incremental contribution profit by <b>${os_.gain_pct.toFixed(0)}%</b> versus an even split — from ${fmtMoney(os_.baseline_incremental_profit)} to ${fmtMoney(os_.optimized_incremental_profit)}.`;
+
+document.getElementById("generated-at").innerText = "Data generated " + D.generated_at + " · synthetic dataset, seeded and reproducible.";
+
+// scroll-spy nav
+const sections = [...document.querySelectorAll("section")];
+const links = [...document.querySelectorAll("nav a")];
+window.addEventListener("scroll", ()=>{
+  let idx = 0;
+  const y = window.scrollY + 90;
+  sections.forEach((s,i)=>{ if(s.offsetTop <= y) idx = i; });
+  links.forEach(l=>l.classList.remove("active"));
+  if(links[idx]) links[idx].classList.add("active");
+});
+</script>
+</body>
+</html>

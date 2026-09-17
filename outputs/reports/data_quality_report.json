@@ -1,0 +1,16 @@
+{
+  "duplicate_order_ids": 0,
+  "missing_values": {
+    "rating": 15788
+  },
+  "negative_financials": 0,
+  "orphan_customer_fk": 0,
+  "orphan_restaurant_fk": 0,
+  "financial_equation_mismatches": 0,
+  "order_status_values": {
+    "Delivered": 151645,
+    "Cancelled": 10252,
+    "Refunded": 5536
+  },
+  "status": "PASS"
+}

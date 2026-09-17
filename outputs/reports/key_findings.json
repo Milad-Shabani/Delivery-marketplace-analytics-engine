@@ -1,0 +1,27 @@
+{
+  "highest_margin_city": {
+    "city": "Northfield",
+    "contribution_margin_pct": 23.0
+  },
+  "weakest_margin_city": {
+    "city": "Lakeside City",
+    "contribution_margin_pct": -3.1
+  },
+  "highest_value_segment": {
+    "segment": "High Value",
+    "contribution_profit_per_order": 0.87
+  },
+  "best_ltv_cac_channel": {
+    "channel": "Organic/Referral",
+    "ltv_to_cac": 2.43
+  },
+  "annualized_order_growth_rate_pct": 65.7,
+  "current_contribution_margin_pct": 6.54,
+  "strategic_plan_verdict": "Achievable, but only with a combined plan -- no single lever gets there alone. The model shows the target requires simultaneous discount discipline, delivery-cost efficiency, and a modest take-rate increase, not organic growth alone.",
+  "optimization_incremental_profit_gain_pct": 88.5,
+  "total_orders": 167433,
+  "total_customers": 12000,
+  "total_restaurants": 320,
+  "total_riders": 520,
+  "history_months": 17
+}
