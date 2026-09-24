@@ -299,10 +299,9 @@ workbook. Optimization convergence is checked explicitly
 
 ```bash
 ./publish.sh     # macOS/Linux, requires `gh` (GitHub CLI) authenticated
-publish.bat      # Windows
 ```
 
-Both scripts init git, create the GitHub repo, push, set topics, and enable
+The script inits git, creates the GitHub repo, pushes, sets topics, and enables
 GitHub Pages (served from `dashboard/` via the included Actions workflow).
 
 ## Publishing the Dashboard with GitHub Pages
