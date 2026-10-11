@@ -51,6 +51,32 @@ modeling assumption, documented here rather than hidden in code.
 These are stated assumptions for the LTV:CAC analysis, not observed data —
 flagged here explicitly per the "no data fabrication" principle below.
 
+### Marketing spend table (v2)
+`data/raw/marketing_spend.csv` (month × channel: `signups`, `marketing_spend`,
+`cac`) is a *generated* table: spend = sign-ups × the channel CAC above, with
+CAC drifting up each month (Paid Search +1.5 %/month, Paid Social +1.2 %,
+Partnership +0.6 %, Push/CRM +0.3 %, Organic +0.2 %) and ±6 % noise. The
+dashboard's "observed" CAC and observed LTV:CAC come from this table, so the
+gap to the planning assumption is a modelled outcome of that drift — not
+market evidence. Only customers who sign up inside the reporting window
+(Apr 2025 – 23 Aug 2026) count as acquisitions.
+
+### Rider shifts table (v2)
+`data/raw/rider_shifts.csv` (rider × month: `orders`, `busy_hours`,
+`online_hours`, `distance_km`). Busy hours = distance / vehicle speed
+(Bike 14, Scooter 22, Car 26 km/h) + 0.12 h hand-off per order; online hours =
+busy hours / a per-rider-month utilization drawn around 45 % (bounded 25–75 %).
+
+Both tables use their own seeded random streams, so the original six tables
+and every v1 number are bit-for-bit unchanged.
+
+### Sign-up truncation
+Customer sign-ups are generated over a fixed 510-day window ending on
+2026-08-23, so the final reporting month holds only ~22 days of sign-ups.
+Sign-up-driven KPIs (new customers, new-customer share, marketing spend, CAC,
+marketing % of revenue) therefore use a trailing 3-month window on the
+scorecard (tagged "3M") instead of a single month.
+
 ## Forecast horizon & scenarios
 - 12-month forecast horizon; rolling-origin validation with a 3-month holdout
   per fold (see `docs/forecasting_methodology.md`).
@@ -63,8 +89,7 @@ flagged here explicitly per the "no data fabrication" principle below.
 - Budget = trailing-3-month average monthly promotion spend in the dataset.
 
 ## No data fabrication
-This project does not claim to use real data from Snapfood, SnappFood,
-DoorDash, Uber Eats, Deliveroo, or any other real company. All figures above
+This project does not claim to use real data from any real company. All figures above
 are either generated synthetically with documented parameters, or stated
 illustrative assumptions (like the CAC table) used consistently throughout
 the analysis.

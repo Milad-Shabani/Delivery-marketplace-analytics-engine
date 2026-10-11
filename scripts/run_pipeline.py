@@ -16,6 +16,7 @@ from finance.finance import (
 from forecasting.forecast import build_forecast_table, scenario_cases
 from optimization.optimize import build_cells, optimize_allocation, summarize_optimization
 from analytics.planning import build_plan
+from analytics.kpis import monthly_kpi_extension, build_scorecard, build_kpi_bundle
 
 RAW = os.path.join(ROOT, "data", "raw")
 PROC = os.path.join(ROOT, "data", "processed")
@@ -39,24 +40,26 @@ def validate(orders: pd.DataFrame, customers: pd.DataFrame, restaurants: pd.Data
 
 
 def main(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_000):
-    print("1/9 Generating synthetic data ...")
+    print("1/10 Generating synthetic data ...")
     data = generate_all(n_customers, n_restaurants, n_riders, target_orders)
 
-    print("2/9 Validating data quality ...")
+    print("2/10 Validating data quality ...")
     dq = validate(data.orders, data.customers, data.restaurants)
     with open(os.path.join(OUT, "reports", "data_quality_report.json"), "w") as f:
         json.dump(dq, f, indent=2, default=str)
     print("   ->", dq["status"], "| orders:", len(data.orders))
 
-    print("3/9 Saving raw tables ...")
+    print("3/10 Saving raw tables ...")
     data.cities.to_csv(f"{RAW}/cities.csv", index=False)
     data.zones.to_csv(f"{RAW}/zones.csv", index=False)
     data.restaurants.to_csv(f"{RAW}/restaurants.csv", index=False)
     data.riders.to_csv(f"{RAW}/riders.csv", index=False)
     data.customers.to_csv(f"{RAW}/customers.csv", index=False)
     data.orders.to_csv(f"{RAW}/orders.csv", index=False)
+    data.marketing_spend.to_csv(f"{RAW}/marketing_spend.csv", index=False)
+    data.rider_shifts.to_csv(f"{RAW}/rider_shifts.csv", index=False)
 
-    print("4/9 Building derived tables (customers, restaurants, riders, cohorts) ...")
+    print("4/10 Building derived tables (customers, restaurants, riders, cohorts) ...")
     cust_enriched = enrich_customers(data.customers, data.orders)
     rest_daily = restaurant_daily_metrics(data.orders)
     rest_summary = restaurant_summary(data.restaurants, data.orders)
@@ -73,7 +76,7 @@ def main(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_0
     cohorts.to_csv(f"{PROC}/cohorts.csv", index=False)
     rfm.to_csv(f"{PROC}/rfm.csv", index=False)
 
-    print("5/9 Financial analysis, unit economics, driver decomposition ...")
+    print("5/10 Financial analysis, unit economics, driver decomposition ...")
     pnl = pnl_summary(monthly)
     ue_city = unit_economics_by(data.orders, "city_id", data.cities[["city_id", "city_name"]])
     ue_segment = unit_economics_by(
@@ -97,19 +100,29 @@ def main(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_0
     drivers.to_csv(f"{PROC}/margin_driver_decomposition.csv", index=False)
     quadrants.to_csv(f"{PROC}/restaurant_quadrants.csv", index=False)
 
-    print("6/9 Demand forecasting (rolling-origin validation across 3 models) ...")
+    print("6/10 Extended KPI layer (unit economics, customers, operations, marketing) ...")
+    mx = monthly_kpi_extension(data.orders, monthly, data.marketing_spend, data.rider_shifts, data.customers, cohorts)
+    scorecard = build_scorecard(mx)
+    kpi_bundle = build_kpi_bundle(data, cust_enriched, mx, cac_ltv, cac_by_channel)
+    mx.to_csv(f"{PROC}/kpi_monthly_extended.csv", index=False)
+    with open(f"{PROC}/kpi_scorecard.json", "w") as f:
+        json.dump(scorecard, f, indent=2, default=str)
+    with open(f"{PROC}/kpi_bundle.json", "w") as f:
+        json.dump(kpi_bundle, f, default=str)
+
+    print("7/10 Demand forecasting (rolling-origin validation across 3 models) ...")
     forecast_df, forecast_results = build_forecast_table(monthly, horizon=12)
     forecast_scn = scenario_cases(forecast_df)
     forecast_scn.to_csv(f"{PROC}/forecast.csv", index=False)
     with open(f"{PROC}/forecast_model_selection.json", "w") as f:
         json.dump({k: {kk: vv for kk, vv in v.items() if kk in ("model_selected", "validation")} for k, v in forecast_results.items()}, f, indent=2, default=str)
 
-    print("7/9 Scenario planning + strategic plan ...")
+    print("8/10 Scenario planning + strategic plan ...")
     plan = build_plan(monthly)
     with open(f"{PROC}/strategic_plan.json", "w") as f:
         json.dump(plan, f, indent=2, default=str)
 
-    print("8/9 Promotion budget optimization ...")
+    print("9/10 Promotion budget optimization ...")
     cells = build_cells(data.orders, cust_enriched, data.cities)
     monthly_promo_budget = float(monthly.promotion_cost.tail(3).mean())
     alloc = optimize_allocation(cells, total_budget=monthly_promo_budget)
@@ -118,7 +131,7 @@ def main(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_0
     with open(f"{PROC}/optimization_summary.json", "w") as f:
         json.dump(opt_summary, f, indent=2, default=str)
 
-    print("9/9 Key findings ...")
+    print("10/10 Key findings ...")
     findings = compute_findings(data, cust_enriched, ue_city, ue_segment, cac_ltv, monthly, plan, opt_summary)
     with open(f"{OUT}/reports/key_findings.json", "w") as f:
         json.dump(findings, f, indent=2, default=str)
@@ -128,7 +141,8 @@ def main(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_0
     return dict(data=data, cust_enriched=cust_enriched, rest_summary=rest_summary, rid_summary=rid_summary,
                 monthly=monthly, cohorts=cohorts, rfm=rfm, pnl=pnl, ue_city=ue_city, ue_segment=ue_segment,
                 ue_channel=ue_channel, cac_ltv=cac_ltv, drivers=drivers, quadrants=quadrants,
-                forecast=forecast_scn, plan=plan, alloc=alloc, opt_summary=opt_summary, findings=findings, dq=dq)
+                forecast=forecast_scn, plan=plan, alloc=alloc, opt_summary=opt_summary, findings=findings, dq=dq,
+                mx=mx, scorecard=scorecard, kpi_bundle=kpi_bundle)
 
 
 def compute_findings(data, cust_enriched, ue_city, ue_segment, cac_ltv, monthly, plan, opt_summary) -> dict:

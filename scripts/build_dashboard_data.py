@@ -25,6 +25,10 @@ def main():
     cohorts = pd.read_csv(f"{PROC}/cohorts.csv", parse_dates=["cohort_month"])
     forecast = pd.read_csv(f"{PROC}/forecast.csv", parse_dates=["month"])
     alloc = pd.read_csv(f"{PROC}/optimization_allocation.csv")
+    with open(f"{PROC}/kpi_scorecard.json") as f:
+        scorecard = json.load(f)
+    with open(f"{PROC}/kpi_bundle.json") as f:
+        kpi_bundle = json.load(f)
     with open(f"{PROC}/optimization_summary.json") as f:
         opt_summary = json.load(f)
     with open(f"{PROC}/strategic_plan.json") as f:
@@ -167,12 +171,16 @@ def main():
         "plan": plan,
         "findings": findings,
         "data_quality": dq,
+        # ---- v2: extended KPI layer (see src/analytics/kpis.py) ----
+        "schema_version": 2,
+        "scorecard": scorecard,
+        **kpi_bundle,
     }
 
-    js = "window.NOVAFOOD_DATA = " + json.dumps(payload, default=str) + ";\n"
-    with open(f"{OUT_DIR}/novafood_data.js", "w") as f:
+    js = "window.DASHBOARD_DATA = " + json.dumps(payload, default=str) + ";\n"
+    with open(f"{OUT_DIR}/dashboard_data.js", "w") as f:
         f.write(js)
-    print("Wrote", f"{OUT_DIR}/novafood_data.js", len(js), "bytes")
+    print("Wrote", f"{OUT_DIR}/dashboard_data.js", len(js), "bytes")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 [project]
 name = "delivery-marketplace-analytics-engine"
 version = "1.0.0"
-description = "NOVAFOOD — an end-to-end food-delivery marketplace business analytics, financial planning, demand forecasting, and optimization case study (synthetic data)."
+description = "Company 1 — an end-to-end food-delivery marketplace business analytics, financial planning, demand forecasting, and optimization case study (synthetic data)."
 authors = [{ name = "Milad Shabani" }]
 readme = "README.md"
 requires-python = ">=3.10"

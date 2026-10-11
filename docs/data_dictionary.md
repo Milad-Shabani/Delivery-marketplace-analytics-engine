@@ -89,7 +89,30 @@ and `src/optimization`.
 | new_customer_flag, subscription_customer_flag | Behavioral flags |
 | promotion_id, payment_method | Additional context |
 
+## marketing_spend.csv (v2)
+| Field | Description |
+|---|---|
+| month | Month start |
+| acquisition_channel | Same five channels as customers.csv |
+| signups | Customers who signed up that month via the channel (reporting window only) |
+| marketing_spend | Spend in $ = signups × cac |
+| cac | Cost per sign-up that month (blank when there were no sign-ups) |
+
+## rider_shifts.csv (v2)
+| Field | Description |
+|---|---|
+| rider_id, month | Rider-month grain |
+| vehicle_type | Bike / Scooter / Car |
+| orders | Delivered orders in the month |
+| busy_hours | Hours spent on deliveries (travel + hand-off) |
+| online_hours | Hours the rider was available for dispatch |
+| distance_km | Distance ridden |
+
 ## Derived tables (data/processed/)
+- `kpi_monthly_extended.csv` (v2) — ~40 extra monthly KPI columns (unit economics,
+  customer health, operations, marketplace liquidity, marketing efficiency, YoY)
+- `kpi_scorecard.json`, `kpi_bundle.json` (v2) — the executive scorecard and every
+  extra aggregate the dashboards need (see `src/analytics/kpis.py`)
 - `restaurant_daily_metrics.csv`, `restaurant_summary.csv`, `rider_summary.csv`
 - `monthly_financials.csv` — the core monthly P&L + KPI time series
 - `cohorts.csv` — signup-month cohorts × months-since-signup retention
@@ -104,3 +127,24 @@ and `src/optimization`.
 `Never Ordered → New → Subscription → At Risk → Churned → Price Sensitive →
 High Value → Loyal → Occasional`, evaluated in that priority order against
 recency, order frequency, discount dependency, and lifetime contribution profit.
+
+## KPI catalogue (v2 scorecard, 34 KPIs)
+Computed in `src/analytics/kpis.py`; labels and definitions live once in
+`src/dashboard/i18n/en.json` (`kpi_*`, `def_*`) and are mirrored in Persian.
+The scorecard compares the latest month with the previous month; KPIs tagged
+**3M** use a trailing 3-month window (see `docs/assumptions.md`).
+
+| Group | KPIs |
+|---|---|
+| Growth & scale | GMV, GMV growth (YoY), delivered orders, active customers, orders per active customer |
+| Profitability | Platform revenue, take rate, contribution profit, contribution margin, contribution / order |
+| Unit economics (per order) | AOV, revenue / order, cost to serve / order, delivery-fee coverage, promotion burden |
+| Customers | New customers / month (3M), new-customer share (3M), month-1 retention, subscriber order share |
+| Delivery operations | On-time rate (≤ 5 min late), avg. delivery time, very-late rate (> 15 min), cancellation rate, refund rate, avg. rating |
+| Marketplace health | Active restaurants, orders / restaurant, active riders, rider utilization, orders / rider-hour |
+| Marketing efficiency | Marketing spend / month (3M), blended CAC (3M), marketing % of revenue (3M), discount rate |
+
+Notes: "new customer" = signed up and ordered in the same month (the older
+"first order within 3 days" flag is kept in `monthly_financials.csv` but is not
+used for the scorecard); month-1 retention = share of last month's sign-up
+cohort that ordered this month.

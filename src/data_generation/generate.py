@@ -1,5 +1,5 @@
 """
-NOVAFOOD synthetic data generator.
+Company 1 synthetic data generator.
 
 Produces a reproducible, internally-consistent synthetic dataset simulating an
 online food-delivery marketplace: customers, restaurants, riders, cities/zones,
@@ -165,7 +165,7 @@ CUSTOMER_SEGMENT_ORDER = ["New", "Occasional", "Loyal", "High Value", "Subscript
 def build_customers(cities: pd.DataFrame, n=12000) -> pd.DataFrame:
     city_ids = RNG.choice(cities.city_id.values, size=n,
                            p=cities.demand_weight.values / cities.demand_weight.sum())
-    # NOVAFOOD already had an established base before this reporting window opens:
+    # Company 1 already had an established base before this reporting window opens:
     # ~45% of customers signed up in the 12 months before HIST_START (pre-existing base),
     # the remainder sign up progressively during the history window (new-customer growth).
     pre_existing = RNG.random(n) < 0.45
@@ -434,6 +434,79 @@ def simulate_orders(customers: pd.DataFrame, restaurants: pd.DataFrame, riders: 
     return orders
 
 
+# ---------------------------------------------------------------------------
+# v2 additions: observed marketing spend and rider shift hours.
+#
+# These two tables use their OWN seeded random streams (seed + offset) so adding
+# them does not consume any draw from the main RNG -- the original six tables
+# (and every number derived from them) are bit-for-bit identical to v1.
+# ---------------------------------------------------------------------------
+
+# Illustrative base cost to acquire one signup, per channel (same figures the
+# LTV:CAC analysis has always assumed -- see docs/assumptions.md).
+CAC_BASE = {"Organic/Referral": 1.5, "Paid Social": 9.0, "Paid Search": 11.5, "Push/CRM": 2.0, "Partnership": 6.0}
+# Month-over-month CAC inflation per channel: paid auctions get more expensive
+# as the marketplace scales, owned/organic channels barely move.
+CAC_INFLATION_PER_MONTH = {"Organic/Referral": 0.002, "Push/CRM": 0.003, "Partnership": 0.006,
+                           "Paid Social": 0.012, "Paid Search": 0.015}
+
+VEHICLE_SPEED_KMH = {"Bike": 14.0, "Scooter": 22.0, "Car": 26.0}
+HANDLING_HOURS_PER_ORDER = 0.12  # ~7 min of pickup + hand-off per order
+
+
+def build_marketing_spend(customers: pd.DataFrame, seed: int = SEED) -> pd.DataFrame:
+    """Monthly acquisition spend by channel (month x channel grid).
+
+    signups   = customers who signed up that month through that channel
+                (only customers who sign up inside the reporting window count;
+                the pre-existing base was acquired before it).
+    spend     = signups x channel CAC, where CAC drifts up month over month
+                (faster for paid channels) with a little multiplicative noise.
+    """
+    rng = np.random.default_rng(seed + 101)
+    months = pd.date_range(HIST_START, HIST_END, freq="MS")
+    c = customers[customers.signup_date >= HIST_START].copy()
+    c["month"] = c.signup_date.dt.to_period("M").dt.to_timestamp()
+    signups = c.groupby(["month", "acquisition_channel"]).customer_id.nunique()
+
+    rows = []
+    for m_idx, month in enumerate(months):
+        for ch in ACQUISITION_CHANNELS:
+            n_sign = int(signups.get((month, ch), 0))
+            cac = CAC_BASE[ch] * (1 + CAC_INFLATION_PER_MONTH[ch]) ** m_idx * float(rng.lognormal(0, 0.06))
+            rows.append(dict(month=month, acquisition_channel=ch, signups=n_sign,
+                             marketing_spend=round(n_sign * cac, 2),
+                             cac=round(cac, 2) if n_sign > 0 else np.nan))
+    return pd.DataFrame(rows)
+
+
+def build_rider_shifts(riders: pd.DataFrame, orders: pd.DataFrame, seed: int = SEED) -> pd.DataFrame:
+    """Rider-month online hours.
+
+    busy_hours   = sum over the rider's delivered orders of
+                   distance / vehicle speed + a fixed pickup/hand-off allowance
+    online_hours = busy_hours / utilization, with a per-rider-month utilization
+                   drawn around ~45% (riders wait between dispatches).
+    """
+    rng = np.random.default_rng(seed + 202)
+    d = orders[orders.order_status.isin(["Delivered", "Refunded"])].copy()
+    vehicle = riders.set_index("rider_id").vehicle_type
+    d["vehicle_type"] = d.rider_id.map(vehicle)
+    d["busy"] = d.delivery_distance_km / d.vehicle_type.map(VEHICLE_SPEED_KMH) + HANDLING_HOURS_PER_ORDER
+    d["month"] = d.order_date.dt.to_period("M").dt.to_timestamp()
+    g = d.groupby(["rider_id", "month"]).agg(
+        orders=("order_id", "count"),
+        busy_hours=("busy", "sum"),
+        distance_km=("delivery_distance_km", "sum"),
+    ).reset_index()
+    util = np.clip(rng.beta(9, 11, len(g)), 0.25, 0.75)
+    g["online_hours"] = (g.busy_hours / util).round(2)
+    g["busy_hours"] = g.busy_hours.round(2)
+    g["distance_km"] = g.distance_km.round(1)
+    g["vehicle_type"] = g.rider_id.map(vehicle)
+    return g
+
+
 @dataclass
 class GeneratedData:
     cities: pd.DataFrame
@@ -442,6 +515,8 @@ class GeneratedData:
     riders: pd.DataFrame
     customers: pd.DataFrame
     orders: pd.DataFrame
+    marketing_spend: pd.DataFrame | None = None
+    rider_shifts: pd.DataFrame | None = None
 
 
 def generate_all(n_customers=12000, n_restaurants=320, n_riders=520, target_orders=180_000, seed=SEED) -> GeneratedData:
@@ -453,7 +528,10 @@ def generate_all(n_customers=12000, n_restaurants=320, n_riders=520, target_orde
     riders = build_riders(zones, n=n_riders)
     customers = build_customers(cities, n=n_customers)
     orders = simulate_orders(customers, restaurants, riders, zones, cities, target_orders=target_orders)
-    return GeneratedData(cities, zones, restaurants, riders, customers, orders)
+    # v2 tables: separate random streams, so the six tables above are unchanged.
+    marketing_spend = build_marketing_spend(customers, seed=seed)
+    rider_shifts = build_rider_shifts(riders, orders, seed=seed)
+    return GeneratedData(cities, zones, restaurants, riders, customers, orders, marketing_spend, rider_shifts)
 
 
 if __name__ == "__main__":

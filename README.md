@@ -1,27 +1,26 @@
 # Delivery Marketplace Analytics Engine
 
-### NOVAFOOD Case Study — End-to-End Business Analytics, Financial Modeling, Demand Forecasting & Optimization
+### Company 1 Case Study — End-to-End Business Analytics, Financial Modeling, Demand Forecasting & Optimization
 
 > Synthetic data, real methodology. This project simulates a food-delivery
 > marketplace end to end — from an order-level ledger to a management
 > decision — using the same techniques (rolling-origin forecast validation,
 > constrained optimization, cohort/RFM analysis, driver decomposition) an
 > analytics team would use on real data. It is not affiliated with, and does
-> not use data from, Snapfood, SnappFood, DoorDash, Uber Eats, Deliveroo, or
-> any real company.
+> not use data from, any real company.
 
-![Dashboard preview](docs/screenshots/section_1_overview.png)
-*Faithful preview render generated from the project's own data pipeline (see [Dashboard Preview](#dashboard-preview) below for all 7 sections) — open `dashboard/index.html` for the live, interactive version.*
+![Dashboard preview](docs/screenshots/dashboard_en_overview.png)
+*Screenshot of the live dashboard (English). A full right-to-left Persian version is included — see [Dashboard Preview](#dashboard-preview). Open `dashboard/index.html` (English) or `dashboard/fa/index.html` (فارسی) for the interactive versions.*
 
 ## Executive Summary
 
-NOVAFOOD is a fictional online food-delivery marketplace operating across 8
+Company 1 is a fictional online food-delivery marketplace operating across 8
 cities. Delivered orders have grown ~65% annualized over a 17-month history,
 but contribution margin has stayed thin (~6-7% of platform revenue) and is
 negative in at least one city. This repository answers the central question
 management actually asked:
 
-> **Can NOVAFOOD grow orders while improving contribution profit?**
+> **Can Company 1 grow orders while improving contribution profit?**
 
 ...by building the full analytics stack: KPI model → financial P&L → unit
 economics → cohorts/RFM → restaurant/rider performance → 12-month demand
@@ -31,7 +30,7 @@ workbook.
 
 ## Business Problem
 
-NOVAFOOD's leadership wants five questions answered:
+Company 1's leadership wants five questions answered:
 
 1. Which cities, segments, restaurants, and zones drive *profitable* growth?
 2. Why is revenue growing faster or slower than contribution profit?
@@ -83,16 +82,23 @@ delivery-marketplace-analytics-engine/
 │   ├── finance/            # P&L, unit economics, margin driver decomposition
 │   ├── forecasting/        # rolling-origin model validation + selection
 │   ├── optimization/       # promo-budget allocation (SciPy trust-constr)
-│   ├── analytics/          # strategic growth-vs-margin plan
-│   └── dashboard/, reporting/
+│   ├── analytics/          # strategic plan + extended KPI layer (kpis.py)
+│   └── dashboard/          # bilingual template + i18n/{en,fa}.json
+
 ├── scripts/
 │   ├── run_pipeline.py         # generate → validate → analyze → save
-│   ├── build_excel.py          # NOVAFOOD_Business_Analytics.xlsx
-│   └── build_dashboard_data.py # dashboard/data/novafood_data.js
-├── dashboard/index.html    # self-contained HTML dashboard (Plotly)
+│   ├── build_excel.py          # Company1_Business_Analytics.xlsx
+│   ├── build_dashboard_data.py # dashboard/data/dashboard_data.js
+│   └── build_dashboards.py     # template + i18n -> the two dashboards
+├── dashboard/
+│   ├── index.html          # English dashboard (Plotly)
+│   ├── fa/index.html       # Persian (RTL) dashboard
+│   ├── data/dashboard_data.js
+│   └── assets/
+
 ├── data/{raw,processed}/   # generated at build time (gitignored)
 ├── outputs/{excel,reports,dashboard}/
-├── tests/                  # pytest — 22 tests
+├── tests/                  # pytest — 53 tests
 ├── docs/                   # business case, data dictionary, methodology
 └── .github/workflows/      # CI (tests) + GitHub Pages deploy
 ```
@@ -104,9 +110,12 @@ Plotly.js (CDN, no build step), GitHub Actions.
 
 ## Key KPIs
 
-GMV, delivered orders, platform revenue, contribution profit & margin %, AOV,
-active/new/repeat customers, on-time delivery rate, cancellation rate,
-LTV : CAC by channel, cohort retention. Full list and formulas in
+34 scorecard KPIs in seven groups — growth, profitability, per-order unit
+economics, customers, delivery operations, marketplace health and marketing
+efficiency (GMV, YoY growth, take rate, contribution margin before *and after*
+promotions, cost to serve, delivery-fee coverage, month-1 retention, on-time /
+very-late / cancellation / refund rates, rider utilization, observed CAC and
+LTV : CAC, …) plus cohort retention and customer concentration. Full list and formulas in
 [`docs/data_dictionary.md`](docs/data_dictionary.md) and the workbook's
 `KPI_Definitions` sheet.
 
@@ -159,55 +168,26 @@ See [`docs/optimization_methodology.md`](docs/optimization_methodology.md).
 
 ## Dashboard Preview
 
-No live browser is available in this build environment to capture an actual
-screenshot, so `docs/screenshots/make_preview.py` composes preview images
-from the **same real pipeline output** (matplotlib, not a mockup) — one per
-dashboard section. Open `dashboard/index.html` for the live, interactive
-Plotly version (hover tooltips, a searchable cohort heatmap, and a
-scroll-spy nav across all 7 sections).
+The dashboard ships in two languages built from one template
+(`src/dashboard/template.html` + `i18n/en.json` / `i18n/fa.json`):
 
-### 1. Executive Overview
-![Executive Overview](docs/screenshots/section_1_overview.png)
-Trailing-month KPI band (GMV, delivered orders, contribution margin, active
-customers, on-time rate), the GMV trend by month, and contribution profit by
-city — the first read on whether growth is happening *profitably*, and where.
+- English — `dashboard/index.html`
+- فارسی (right-to-left, Vazirmatn FD digits) — `dashboard/fa/index.html`
 
-### 2. Financial Performance
-![Financial Performance](docs/screenshots/section_2_financial.png)
-The contribution-margin trend, the trailing-quarter revenue mix (commission /
-delivery fee / service fee), and the margin-driver decomposition — which
-levers (discount rate, rider cost, payment processing, refunds, take-rate)
-moved margin between the first and latest month.
+Ten sections: executive KPI scorecard (34 KPIs), financial performance, unit
+economics, customers, restaurants, operations, marketing & promotions,
+forecast & plan, optimization, sources. See
+[`docs/dashboard_guide.md`](docs/dashboard_guide.md).
 
-### 3. Customers & Retention
-![Customers & Retention](docs/screenshots/section_3_customers.png)
-Customer mix by rule-based segment, LTV:CAC by acquisition channel, and a
-monthly cohort-retention heatmap — Organic/Referral and Push/CRM clearly
-outperform paid channels on LTV:CAC here.
+**English — executive overview**
+![English overview](docs/screenshots/dashboard_en_overview.png)
 
-### 4. Restaurant Performance
-![Restaurant Performance](docs/screenshots/section_4_restaurants.png)
-Every restaurant plotted on revenue vs. contribution margin, classified into
-four quadrants (Star / Volume Trap / Niche Profit / Review) — the basis for
-the commission/delivery-cost renegotiation recommendation below.
+**فارسی — نمای کلی مدیریتی**
+![Persian overview](docs/screenshots/dashboard_fa_overview.png)
 
-### 5. Delivery Operations
-![Delivery Operations](docs/screenshots/section_5_operations.png)
-On-time delivery rate and cancellation rate by month — the service-level
-story behind the financial numbers.
-
-### 6. Forecast & Strategic Planning
-![Forecast & Strategic Planning](docs/screenshots/section_6_forecast.png)
-The 12-month delivered-orders forecast (history, point forecast, 80%
-interval) from the rolling-origin-validated Holt-Winters model, next to the
-current-vs-target figures for the "+25% orders / +2pp margin" executive plan.
-
-### 7. Scenario & Optimization
-![Scenario & Optimization](docs/screenshots/section_7_optimization.png)
-Base/Upside/Downside contribution-profit scenarios, and the promotion-budget
-reallocation across the top city × segment cells (baseline even-split vs.
-the SciPy-optimized allocation).
-
+**Marketing & promotions (EN / FA)**
+![English marketing](docs/screenshots/dashboard_en_marketing.png)
+![Persian marketing](docs/screenshots/dashboard_fa_marketing.png)
 
 ## Key Findings
 
@@ -221,6 +201,17 @@ the pipeline) — not hand-written:
 - Annualized order growth rate
 - Strategic-plan feasibility verdict for the +25%/+2pp target
 - Promotion-budget optimization's incremental profit gain vs. an even split
+
+New with the v2 KPI layer (numbers from the current run; they are recomputed on every pipeline run):
+
+- Per order the platform keeps $0.28 of headline contribution, but promotions
+  cost $1.07 per order — after promotions the order loses about $0.79.
+- Paid Social and Paid Search take ~80 % of acquisition spend yet show observed
+  LTV:CAC below 0.5×; Organic/Referral (~2.4×) and Push/CRM (~1.8×) are the only
+  channels above break-even.
+- The top 20 % of customers generate ~54 % of GMV; subscribers churn at 16.8 %
+  versus 27.3 % for non-subscribers.
+- Metroville contributes ~0 % margin and Lakeside City is negative (−3.1 %).
 
 ## Business Recommendations
 
@@ -246,12 +237,13 @@ python -m venv .venv && source .venv/bin/activate   # or .venv\Scripts\activate 
 pip install -r requirements.txt
 
 python scripts/run_pipeline.py          # generate data + run all analytics
-python scripts/build_excel.py           # -> outputs/excel/NOVAFOOD_Business_Analytics.xlsx
-python scripts/build_dashboard_data.py  # -> dashboard/data/novafood_data.js
+python scripts/build_excel.py           # -> outputs/excel/Company1_Business_Analytics.xlsx
+python scripts/build_dashboard_data.py  # -> dashboard/data/dashboard_data.js
+python scripts/build_dashboards.py      # -> dashboard/index.html (EN) + dashboard/fa/index.html (FA)
 
-pytest tests/ -v                        # 22 tests
+pytest tests/ -v                        # 53 tests
 
-open dashboard/index.html               # or just double-click it — no server needed
+open dashboard/index.html               # English; Persian: dashboard/fa/index.html — no server needed
 ```
 
 ## Data Dictionary
@@ -274,7 +266,7 @@ workbook. Optimization convergence is checked explicitly
 ## Limitations
 
 - Synthetic data: realistic *relationships*, not real observed behavior —
-  treat findings as a methodology demonstration, not a real NOVAFOOD.
+  treat findings as a methodology demonstration, not a real Company 1.
 - Scale reduced from the original 300k-orders brief for build-time
   reasons (see "Scope note" above); the generator scales up with no code
   changes.
@@ -284,8 +276,11 @@ workbook. Optimization convergence is checked explicitly
 - Prediction intervals are a simplified residual-based band, not a full
   state-space or bootstrap interval (documented in
   `docs/forecasting_methodology.md`).
-- CAC by channel is a stated assumption for the LTV:CAC analysis, not
-  observed spend data (documented in `docs/assumptions.md`).
+- CAC by channel is a stated assumption; the "observed" CAC in v2 comes from a
+  generated marketing-spend table with built-in CAC inflation, so it is a modelled
+  outcome, not market evidence (documented in `docs/assumptions.md`).
+- Customer sign-ups end on 2026-08-23, so sign-up-driven KPIs use a trailing
+  3-month window on the scorecard.
 
 ## Future Improvements
 
@@ -295,21 +290,16 @@ workbook. Optimization convergence is checked explicitly
 - Add a restaurant-menu-level (SKU) analysis layer.
 - Wire the dashboard to a live data source instead of a static JS payload.
 
-## How to Publish
-
-```bash
-./publish.sh     # macOS/Linux, requires `gh` (GitHub CLI) authenticated
-```
-
-The script inits git, creates the GitHub repo, pushes, sets topics, and enables
-GitHub Pages (served from `dashboard/` via the included Actions workflow).
-
 ## Publishing the Dashboard with GitHub Pages
 
-Handled automatically by `.github/workflows/pages.yml` on every push to
-`main` that touches `dashboard/**` — no manual `docs/index.html` step needed.
-Once enabled, the dashboard is live at
-`https://<your-username>.github.io/delivery-marketplace-analytics-engine/`.
+`.github/workflows/pages.yml` deploys the `dashboard/` folder on every push to
+`main` that touches `dashboard/**`. One-time setup: **Settings → Pages → Build
+and deployment → Source: GitHub Actions**. Then:
+
+- English: `https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/`
+- فارسی: `https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/fa/`
+
+The two pages link to each other (language switch in the header, link in the footer).
 
 ## About the Author
 

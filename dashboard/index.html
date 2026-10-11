@@ -1,172 +1,327 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOVAFOOD — Business Intelligence Dashboard</title>
+<title>Company 1 — Business Intelligence Dashboard</title>
+<meta name="description" content="Company 1 business intelligence dashboard: a synthetic online food-delivery marketplace case study with 34 executive KPIs, unit economics, customers, operations, marketing efficiency, forecasting and optimization.">
+<link rel="alternate" hreflang="en" href="https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/">
+<link rel="alternate" hreflang="fa" href="https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/fa/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..800&family=Instrument+Sans:wght@400..700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2/plotly.min.js"></script>
 <style>
+
   :root{
-    --navy:#1f2a44; --navy-2:#2c3a5e; --teal:#0f7c82; --teal-l:#e5f4f4;
-    --ink:#1a2233; --muted:#6b7280; --border:#e6e8ee; --bg:#ffffff; --card:#ffffff;
-    --amber:#e08a2b; --red:#c94b4b; --green:#1f8b5b;
+    --bg:#f2f4f8; --surface:#ffffff; --ink:#131a2b; --ink-2:#2b3550; --muted:#5b6478; --line:#e3e7ee; --line-2:#eef1f5;
+    --deep:#0e1b3d; --deep-2:#16295a;
+    --teal:#0f7c82; --teal-l:#e3f3f3; --navy:#1f2a44;
+    --green:#1a7a50; --green-l:#e4f4ec; --red:#b83c3c; --red-l:#fbeaea; --amber:#b86a12; --amber-l:#fdf1de;
+    --paper:#fffbf1; --paper-ink:#2a2418;
+    --font:'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; --display:'Bricolage Grotesque', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+    --radius:14px; --tilt:-1.4deg; --ring-x:84%; --track:-.02em; --lh:1.65;
   }
+  html[dir=rtl]{--tilt:1.4deg; --ring-x:16%; --track:0; --lh:1.9}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  html{scroll-behavior:smooth;scroll-padding-top:64px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:var(--lh);-webkit-font-smoothing:antialiased}
   a{color:var(--teal)}
-  .wrap{max-width:1240px;margin:0 auto;padding:0 24px;}
-  header.hero{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;padding:38px 0 30px;}
-  header.hero .eyebrow{opacity:.75;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
-  header.hero h1{margin:0 0 6px;font-size:30px;font-weight:800}
-  header.hero p.sub{margin:0;opacity:.85;font-size:15px;max-width:760px;line-height:1.5}
-  nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:20;}
-  nav .navlist{display:flex;gap:2px;overflow-x:auto;padding:0 24px;max-width:1240px;margin:0 auto;}
-  nav a{white-space:nowrap;padding:12px 14px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;}
-  nav a.active,nav a:hover{color:var(--navy);border-bottom-color:var(--teal)}
-  section{padding:36px 0;border-bottom:1px solid var(--border);}
-  section h2{font-size:20px;margin:0 0 4px;color:var(--navy)}
-  section p.desc{margin:0 0 20px;color:var(--muted);font-size:14px;max-width:820px}
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
-  .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
-  .kpi .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:8px}
-  .kpi .value{font-size:24px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
-  .kpi .delta{font-size:12.5px;margin-top:4px;font-weight:600}
-  .up{color:var(--green)} .down{color:var(--red)}
-  .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px 6px;}
-  .card h3{font-size:14px;margin:0 0 8px;color:var(--navy)}
-  .insight{background:var(--teal-l);border:1px solid #cfe9e9;border-left:4px solid var(--teal);border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;margin-bottom:18px}
-  .insight b{color:var(--navy)}
-  table.simple{width:100%;border-collapse:collapse;font-size:13px}
-  table.simple th{text-align:left;color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding:6px 8px}
-  table.simple td{padding:7px 8px;border-bottom:1px solid #f1f2f5}
-  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
-  .tag.star{background:#e3f6ea;color:var(--green)}
-  .tag.volume{background:#fdece4;color:var(--amber)}
-  .tag.niche{background:#eaf1fc;color:#2f5fb3}
-  .tag.review{background:#fbe9e9;color:var(--red)}
-  footer{padding:34px 0 60px}
-  .maker-card{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:12px;padding:16px 20px;max-width:560px}
-  .maker-card .avatar{width:56px;height:56px;border-radius:50%;flex:none;object-fit:cover;border:1px solid var(--border)}
-  .maker-card .name{font-weight:800;color:var(--navy);font-size:15px}
-  .maker-card .role{color:var(--muted);font-size:12.5px;margin-top:2px}
-  .maker-card a{font-size:12.5px}
-  .foot-note{color:var(--muted);font-size:12px;margin-top:14px}
-  .badge-scroll{overflow-x:auto}
-  @media (max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}}
+  :focus-visible{outline:3px solid #7cc4c8;outline-offset:2px;border-radius:6px}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+  .num{direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+  /* ---------- hero: the average order, printed as a receipt ---------- */
+  header.hero{position:relative;overflow:hidden;color:#fff;padding:20px 0 76px;background-color:var(--deep);
+    background-image:repeating-radial-gradient(circle at var(--ring-x) 46%, transparent 0 54px, rgba(255,255,255,.05) 54px 55px),
+                     linear-gradient(160deg,var(--deep) 0%,var(--deep-2) 100%)}
+  .topbar{display:flex;justify-content:flex-end;margin-bottom:34px}
+  .langswitch{display:inline-flex;border:1px solid rgba(255,255,255,.35);border-radius:999px;overflow:hidden;font-size:13px;font-weight:600;background:rgba(255,255,255,.06)}
+  .langswitch a,.langswitch span{padding:6px 18px;text-decoration:none;color:#fff;opacity:.85}
+  .langswitch span{background:#fff;color:var(--deep);opacity:1}
+  .langswitch a:hover{background:rgba(255,255,255,.14);opacity:1}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,390px);gap:64px;align-items:center}
+  header.hero h1{margin:0 0 18px;font-family:var(--display);font-size:clamp(30px,4.4vw,52px);font-weight:800;line-height:1.14;letter-spacing:var(--track);max-width:17ch}
+  html[dir=rtl] header.hero h1{max-width:26ch;line-height:1.4;font-size:clamp(28px,3.5vw,44px)}
+  header.hero p.sub{margin:0;max-width:56ch;font-size:16.5px;line-height:1.75;color:#d5ddf0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .chip{border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 14px;font-size:13.5px;font-weight:600;color:#eaf0ff;background:rgba(255,255,255,.07)}
+
+  .receipt-wrap{margin:0;filter:drop-shadow(0 22px 30px rgba(3,8,24,.45));transform:rotate(var(--tilt));justify-self:center;width:100%;max-width:390px}
+  .receipt{background:var(--paper);color:var(--paper-ink);padding:24px 26px 38px;
+    -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%;
+            mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%}
+  .r-head{text-align:center;font-family:var(--display);font-weight:800;font-size:16px;line-height:1.4}
+  .r-sub{text-align:center;font-size:12.5px;color:#6d6552;margin-top:2px}
+  .r-dash{border-top:1.5px dashed rgba(42,36,24,.4);margin:14px 0 10px}
+  .r-row{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:15px}
+  .r-row .dots{flex:1;border-bottom:1.5px dotted rgba(42,36,24,.35);transform:translateY(-4px);min-width:14px}
+  .r-row .v{font-variant-numeric:tabular-nums;font-weight:700}
+  .r-row.neg .v{color:var(--red)}
+  .r-rule{border-top:1.5px solid var(--paper-ink);margin:9px 0 7px}
+  .r-rule.double{border-top:4px double var(--paper-ink)}
+  .r-row.strong{font-weight:800;font-size:17px}
+  .r-row.strong .v{font-size:19px}
+  .r-foot{margin-top:14px;text-align:center;font-size:12.5px;color:#6d6552}
+  @keyframes print{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .receipt>*{opacity:0;animation:print .45s ease-out forwards;animation-delay:calc(var(--i,0) * 110ms + 350ms)}
+  @media (prefers-reduced-motion:reduce){.receipt>*{opacity:1;animation:none}html{scroll-behavior:auto}}
+
+  /* ---------- navigation ---------- */
+  nav{position:sticky;top:0;z-index:30;background:rgba(242,244,248,.88);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+  nav .navlist{display:flex;gap:4px;overflow-x:auto;padding:8px 28px;max-width:1280px;margin:0 auto;scrollbar-width:none}
+  nav .navlist::-webkit-scrollbar{display:none}
+  nav a{white-space:nowrap;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none;border-radius:999px}
+  nav a:hover{background:#e4e8f0;color:var(--ink)}
+  nav a.active{background:var(--ink);color:#fff}
+
+  /* ---------- sections ---------- */
+  section{padding:46px 0 10px}
+  section h2{font-family:var(--display);font-size:clamp(23px,2.6vw,30px);margin:0 0 6px;color:var(--ink);font-weight:800;letter-spacing:var(--track);line-height:1.3}
+  section p.desc{margin:0 0 22px;color:var(--muted);font-size:14.5px;max-width:76ch;line-height:1.8}
+  h3.sub-h{font-size:15px;margin:0;color:var(--ink);font-weight:700}
+
+  /* ---------- KPI scorecard ---------- */
+  .score-group{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;padding:22px 0;border-top:1px solid var(--line)}
+  .score-group:first-child{border-top:0;padding-top:6px}
+  .score-group h3.sub-h{font-family:var(--display);font-size:16.5px;line-height:1.4}
+  .g-count{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 15px 10px;position:relative;overflow:hidden;min-width:0}
+  .tile::before{content:"";position:absolute;inset-inline:0;top:0;height:3px;background:var(--line)}
+  .tile.good::before{background:var(--green)} .tile.bad::before{background:var(--red)}
+  .tile .t-label{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:flex-start;justify-content:space-between;line-height:1.45}
+  .tile .win{font-size:10.5px;font-weight:700;color:var(--teal);border:1px solid #b9dcdd;border-radius:8px;padding:0 6px;white-space:nowrap;background:var(--teal-l)}
+  .tile .t-value{font-family:var(--display);font-size:25px;font-weight:800;color:var(--ink);margin-top:6px;line-height:1.2;letter-spacing:var(--track)}
+  .tile .t-delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;margin-top:6px;padding:1px 9px;border-radius:999px;background:var(--line-2);color:var(--muted)}
+  .tile .t-delta.good{background:var(--green-l);color:var(--green)} .tile .t-delta.bad{background:var(--red-l);color:var(--red)}
+  .tile svg.spark{display:block;margin-top:8px;width:100%;height:28px;overflow:visible}
+  .tile.mini{padding:14px 15px 12px}
+  .tile.mini .t-value{font-size:22px}
+  .tile .t-sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.55}
+
+  /* ---------- cards, callouts, tables ---------- */
+  .grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+  .grid2.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+  .grid2>*,.grid3>*{min-width:0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 10px;min-width:0}
+  .card h3{font-family:var(--display);font-size:15.5px;margin:0 0 8px;color:var(--ink);font-weight:700;line-height:1.5}
+  .card p.cap{font-size:12.5px;color:var(--muted);margin:-3px 0 6px;line-height:1.7}
+  .insight{background:var(--surface);border:1px solid var(--line);border-inline-start:5px solid var(--teal);border-radius:12px;padding:16px 22px;font-size:15.5px;line-height:1.9;margin:0 0 20px;color:var(--ink-2);max-width:100%}
+  .insight b{color:var(--ink)}
+  .insight.warn{border-inline-start-color:var(--amber);background:#fffaf1}
+  table.simple{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.simple th{text-align:start;color:var(--muted);font-weight:700;font-size:12.5px;border-bottom:1px solid var(--line);padding:7px 8px}
+  table.simple td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:top}
+  table.simple td.n,table.simple th.n{text-align:end;font-variant-numeric:tabular-nums}
+  .tbl-wrap{overflow-x:auto;margin-bottom:10px}
+  footer{padding:46px 0 70px}
+  .maker-card{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;max-width:560px}
+  .maker-card .avatar{width:58px;height:58px;border-radius:50%;flex:none;object-fit:cover;border:2px solid var(--teal-l)}
+  .maker-card .name{font-family:var(--display);font-weight:800;color:var(--ink);font-size:16px}
+  .maker-card .role{color:var(--muted);font-size:13px;margin-top:2px}
+  .maker-card a{font-size:13px}
+  .foot-note{color:var(--muted);font-size:12.5px;margin-top:14px}
+  .foot-lang{margin-top:18px;font-size:13.5px}
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:minmax(0,1fr);gap:40px}
+    .grid2,.grid3,.grid2.even{grid-template-columns:minmax(0,1fr)}
+    .score-group{grid-template-columns:minmax(0,1fr);gap:12px}
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .wrap{padding:0 16px} nav .navlist{padding:8px 16px}
+    header.hero{padding-bottom:56px}
+  }
 </style>
 </head>
 <body>
 
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow">Business Analytics &middot; Financial Planning &middot; Demand Forecasting &middot; Optimization</div>
-    <h1>NOVAFOOD — Business Intelligence Dashboard</h1>
-    <p class="sub">A synthetic online food-delivery marketplace case study: from order-level data to a management decision on growth vs. contribution margin. Not affiliated with any real company — see the Sources section for methodology.</p>
+    <div class="topbar">
+      <div class="langswitch" aria-label="Language">
+        <span lang="en">English</span><a href="fa/index.html" hreflang="fa" lang="fa">فارسی</a>
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Company 1: growth, margin and the cost of every order</h1>
+        <p class="sub">A synthetic online food-delivery marketplace, followed from single orders to a management decision on growth versus margin. Not affiliated with any real company; methodology is in the Sources section.</p>
+        <div class="chips" id="hero-chips"></div>
+      </div>
+      <figure class="receipt-wrap"><div class="receipt" id="receipt"></div></figure>
+    </div>
   </div>
 </header>
 
 <nav><div class="navlist" id="navlist">
-  <a href="#overview">Executive Overview</a>
-  <a href="#financial">Financial</a>
-  <a href="#customers">Customers &amp; Retention</a>
+  <a href="#overview">Overview</a>
+  <a href="#financial">Financials</a>
+  <a href="#unit">Unit economics</a>
+  <a href="#customers">Customers</a>
   <a href="#restaurants">Restaurants</a>
   <a href="#operations">Operations</a>
-  <a href="#forecast">Forecast &amp; Planning</a>
-  <a href="#optimization">Scenario &amp; Optimization</a>
+  <a href="#marketing">Marketing</a>
+  <a href="#forecast">Forecast</a>
+  <a href="#optimization">Optimization</a>
   <a href="#sources">Sources</a>
 </div></nav>
 
 <div class="wrap">
 
 <section id="overview">
-  <h2>Executive Overview</h2>
-  <p class="desc">Are we growing profitably? Trailing-month marketplace KPIs and the underlying order/GMV trend.</p>
-  <div class="kpi-grid" id="kpi-grid"></div>
+  <h2>Executive overview — KPI scorecard</h2>
+  <p class="desc">Latest month versus the previous month for 34 KPIs in seven groups. Each tile shows the value, the change, and a 12-month sparkline; green/red marks whether the move is good or bad for the business. Tiles tagged “3M” use a trailing 3-month window (sign-up-driven KPIs; see the Sources section). Hover a tile for its definition.</p>
+  <div id="scorecard"></div>
   <div id="insight-overview" class="insight"></div>
   <div class="grid2">
-    <div class="card"><h3>GMV &amp; Delivered Orders by Month</h3><div id="chart-overview-trend" style="height:340px"></div></div>
-    <div class="card"><h3>Contribution Profit by City</h3><div id="chart-overview-city" style="height:340px"></div></div>
+    <div class="card"><h3>GMV and delivered orders by month</h3><div id="c-gmv-orders" style="height:380px"></div></div>
+    <div class="card"><h3>Contribution profit by city</h3><div id="c-city-profit" style="height:380px"></div></div>
   </div>
 </section>
 
 <section id="financial">
-  <h2>Financial Performance</h2>
-  <p class="desc">Marketplace P&amp;L: GMV → net customer spend → platform revenue → contribution profit, plus the cost structure behind the trend.</p>
+  <h2>Financial performance</h2>
+  <p class="desc">Revenue, cost structure and what drives contribution margin. The headline contribution margin is shown before promotions; the after-promotion view charges the platform-funded discounts against it.</p>
   <div id="insight-financial" class="insight"></div>
   <div class="grid2">
-    <div class="card"><h3>Contribution Margin % Trend</h3><div id="chart-margin-trend" style="height:320px"></div></div>
-    <div class="card"><h3>Revenue Mix (Trailing 3 Months)</h3><div id="chart-revenue-mix" style="height:320px"></div></div>
+    <div class="card"><h3>Contribution margin: before vs. after promotions</h3><p class="cap">The gap between the lines is the promotion cost, as a share of platform revenue.</p><div id="c-margin-promo" style="height:310px"></div></div>
+    <div class="card"><h3>Revenue mix (last 3 months)</h3><div id="c-revenue-mix" style="height:340px"></div></div>
   </div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="card"><h3>Cost Structure vs. Platform Revenue</h3><div id="chart-cost-structure" style="height:320px"></div></div>
-    <div class="card"><h3>Margin Driver Decomposition (First vs. Latest Month)</h3><div id="chart-drivers" style="height:320px"></div></div>
+  <div class="grid2">
+    <div class="card"><h3>Cost structure vs. platform revenue</h3><div id="c-cost-structure" style="height:330px"></div></div>
+    <div class="card"><h3>Margin driver decomposition (first vs. last month)</h3><div id="c-drivers" style="height:330px"></div></div>
+  </div>
+</section>
+
+<section id="unit">
+  <h2>Unit economics</h2>
+  <p class="desc">What one delivered order earns and costs the platform — total, by cuisine, by restaurant tier and by payment method.</p>
+  <div id="insight-unit" class="insight warn"></div>
+  <div class="grid2 even">
+    <div class="card"><h3>Unit-economics waterfall — $ per order</h3><p class="cap" id="waterfall-cap"></p><div id="c-waterfall" style="height:360px"></div></div>
+    <div class="card"><h3>Revenue vs. cost to serve per order</h3><div id="c-rev-vs-cost" style="height:390px"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Contribution margin by cuisine</h3><div id="c-cuisine" style="height:440px"></div></div>
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>By restaurant tier</h3><div class="tbl-wrap" id="tbl-tier"></div></div>
+      <div class="card"><h3>By payment method</h3><div class="tbl-wrap" id="tbl-payment"></div></div>
+    </div>
   </div>
 </section>
 
 <section id="customers">
-  <h2>Customers &amp; Retention</h2>
-  <p class="desc">Segments, acquisition-channel efficiency (LTV:CAC), and monthly cohort retention.</p>
+  <h2>Customers & retention</h2>
+  <p class="desc">Acquisition quality, retention, segments, subscription impact and how concentrated revenue is across the customer base.</p>
   <div id="insight-customers" class="insight"></div>
+  <div class="tiles" id="cust-snapshot" style="margin-bottom:16px"></div>
   <div class="grid2">
-    <div class="card"><h3>Customers by Segment</h3><div id="chart-segments" style="height:320px"></div></div>
-    <div class="card"><h3>LTV : CAC by Acquisition Channel</h3><div id="chart-ltv-cac" style="height:320px"></div></div>
+    <div class="card"><h3>Active customers: new vs. returning</h3><div id="c-new-returning" style="height:320px"></div></div>
+    <div class="card"><h3>Month-1 retention by month</h3><div id="c-m1-ret" style="height:320px"></div></div>
   </div>
-  <div class="card" style="margin-top:16px"><h3>Cohort Retention Heatmap (% still ordering, by months since signup)</h3><div id="chart-cohort" style="height:380px"></div></div>
+  <div class="grid2 even">
+    <div class="card"><h3>Customers by segment</h3><div id="c-segments" style="height:340px"></div></div>
+    <div class="card"><h3>Share of customers vs. share of profit</h3><p class="cap">Segments whose profit share exceeds their customer share are over-earning.</p><div id="c-segment-profit" style="height:310px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>Subscribers vs. non-subscribers</h3><div class="tbl-wrap" id="tbl-subscription"></div></div>
+    <div class="card"><h3>Revenue concentration (Lorenz curve)</h3><div id="c-concentration" style="height:320px"></div></div>
+  </div>
+  <div class="card"><h3>Cohort retention heatmap (% of sign-up cohort still ordering)</h3><div id="c-cohort" style="height:400px"></div></div>
 </section>
 
 <section id="restaurants">
-  <h2>Restaurant Performance</h2>
-  <p class="desc">Which restaurants drive GMV but not profit? A revenue-vs-margin quadrant view.</p>
+  <h2>Restaurants & supply</h2>
+  <p class="desc">Which restaurants create profit, how concentrated volume is, and how supply keeps up with demand.</p>
   <div id="insight-restaurants" class="insight"></div>
+  <div class="tiles" id="rest-tiles" style="margin-bottom:16px"></div>
   <div class="grid2">
-    <div class="card"><h3>Revenue vs. Contribution Margin (each dot = 1 restaurant)</h3><div id="chart-quadrant" style="height:380px"></div></div>
-    <div class="card"><h3>Restaurant Count by Quadrant</h3><div id="chart-quadrant-bar" style="height:380px"></div></div>
+    <div class="card"><h3>Restaurant GMV vs. contribution margin (each dot = one restaurant)</h3><div id="c-quadrant" style="height:400px"></div></div>
+    <div class="card"><h3>Restaurants by quadrant</h3><div id="c-quadrant-bar" style="height:400px"></div></div>
   </div>
+  <div class="card"><h3>Supply: active restaurants and orders per restaurant</h3><div id="c-supply" style="height:360px"></div></div>
 </section>
 
 <section id="operations">
-  <h2>Delivery Operations</h2>
-  <p class="desc">Service levels behind the financial numbers: on-time delivery and cancellation rate by month.</p>
+  <h2>Delivery operations</h2>
+  <p class="desc">Speed, reliability, cancellations, demand peaks, city-level performance and rider productivity.</p>
+  <div id="insight-operations" class="insight"></div>
+  <div class="tiles" id="ops-tiles" style="margin-bottom:16px"></div>
+  <div class="grid2 even">
+    <div class="card"><h3>On-time rate</h3><div id="c-ontime" style="height:300px"></div></div>
+    <div class="card"><h3>Cancellation rate</h3><div id="c-cancel" style="height:300px"></div></div>
+  </div>
   <div class="grid2">
-    <div class="card"><h3>On-Time Delivery Rate</h3><div id="chart-ontime" style="height:320px"></div></div>
-    <div class="card"><h3>Cancellation Rate</h3><div id="chart-cancel" style="height:320px"></div></div>
+    <div class="card"><h3>Demand heatmap — orders by weekday × hour</h3><p class="cap">Average delivered orders per day, last 3 months.</p><div id="c-heatmap" style="height:330px"></div></div>
+    <div class="card"><h3>Why orders are cancelled</h3><div id="c-cancel-reasons" style="height:330px"></div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px"><h3>City scorecard</h3><p class="cap">Green = better, red = worse within each column.</p><div class="tbl-wrap" id="tbl-city"></div></div>
+  <div class="grid2">
+    <div class="card"><h3>Rider productivity</h3><div id="c-rider" style="height:360px"></div></div>
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>By vehicle type</h3><div class="tbl-wrap" id="tbl-vehicle"></div></div>
+      <div class="card"><h3>Customer rating by delivery delay</h3><div id="c-delay-rating" style="height:230px"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="marketing">
+  <h2>Marketing efficiency & promotions</h2>
+  <p class="desc">Observed acquisition spend by channel, CAC versus assumptions, LTV:CAC and the real cost of promotions.</p>
+  <div id="insight-marketing" class="insight"></div>
+  <div class="tiles" id="mkt-tiles" style="margin-bottom:16px"></div>
+  <div class="grid2">
+    <div class="card"><h3>Observed marketing spend by channel</h3><div id="c-spend-channel" style="height:340px"></div></div>
+    <div class="card"><h3>Blended CAC by month</h3><div id="c-cac-trend" style="height:340px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>CAC: planning assumption vs. observed (last 3 months)</h3><div id="c-cac-compare" style="height:330px"></div></div>
+    <div class="card"><h3>Observed LTV : CAC by channel</h3><p class="cap">Dashed line = break-even (1.0). A healthy channel is typically 3 or higher.</p><div id="c-ltvcac" style="height:300px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>Promotion intensity</h3><div id="c-discount" style="height:320px"></div></div>
+    <div class="card"><h3>Orders with vs. without a promotion</h3><p class="cap">Contribution after promotions is the true per-order profit of a promoted order.</p><div class="tbl-wrap" id="tbl-promo"></div></div>
   </div>
 </section>
 
 <section id="forecast">
-  <h2>Forecast &amp; Strategic Planning</h2>
-  <p class="desc">12-month demand forecast (rolling-origin model selection) and the executive growth-vs-margin plan.</p>
+  <h2>Forecast & strategic plan</h2>
+  <p class="desc">Twelve-month outlook with 80% intervals and the plan required to reach +25% orders and +2 pp contribution margin.</p>
   <div id="insight-forecast" class="insight"></div>
-  <div class="card"><h3>Delivered Orders — History, Forecast &amp; 80% Interval</h3><div id="chart-forecast" style="height:380px"></div></div>
+  <div class="card"><h3>Delivered orders — history, forecast and 80% interval</h3><div id="c-forecast" style="height:390px"></div></div>
   <div class="grid2" style="margin-top:16px">
-    <div class="card"><h3>Model Selection (rolling-origin validation, WAPE)</h3><div id="table-models"></div></div>
-    <div class="card"><h3>Strategic Plan: +25% Orders, +2pp Margin</h3><div id="plan-box" style="padding:8px 4px 14px;font-size:13.5px;line-height:1.6"></div></div>
+    <div class="card"><h3>Model selection (rolling-origin validation)</h3><div id="table-models"></div></div>
+    <div class="card"><h3>Strategic plan: +25% orders and +2 pp margin</h3><div id="plan-box" style="padding:8px 4px 14px;font-size:13.5px;line-height:1.8"></div></div>
   </div>
 </section>
 
 <section id="optimization">
-  <h2>Scenario &amp; Promotion-Budget Optimization</h2>
-  <p class="desc">Base / Upside / Downside contribution-profit scenarios, and a SciPy-optimized promo-budget re-allocation across city × segment cells.</p>
-  <div class="grid2">
-    <div class="card"><h3>Scenario Cases — Contribution Profit</h3><div id="chart-scenario" style="height:320px"></div></div>
-    <div class="card"><h3>Optimization: Baseline vs. Optimized Spend (Top Cells)</h3><div id="chart-optimization" style="height:320px"></div></div>
+  <h2>Scenarios & promotion-budget optimization</h2>
+  <p class="desc">Downside / base / upside profit scenarios and the optimal allocation of a fixed promotion budget across city × segment cells.</p>
+  <div class="grid2 even">
+    <div class="card"><h3>Scenarios — contribution profit</h3><div id="c-scenario" style="height:330px"></div></div>
+    <div class="card"><h3>Optimization: baseline vs. optimal spend (top cells)</h3><div id="c-optimization" style="height:330px"></div></div>
   </div>
   <div class="insight" id="opt-summary" style="margin-top:16px"></div>
 </section>
 
 <section id="sources">
-  <h2>Sources &amp; Methodology</h2>
-  <p class="desc">This project uses synthetic data designed to simulate realistic food-delivery marketplace economics. It is not affiliated with or based on confidential or real data from any real company (Snapfood, DoorDash, Uber Eats, Deliveroo, or otherwise).</p>
+  <h2>Sources & methodology</h2>
+  <p class="desc">Everything on this page is computed from the synthetic dataset in this repository. No real company data is used.</p>
+  <div class="tbl-wrap">
   <table class="simple">
     <tr><th>Component</th><th>Approach</th></tr>
-    <tr><td>Data generation</td><td>Reproducible NumPy/pandas simulation (fixed seed) of ~12,000 customers, 320 restaurants, 520 riders, ~167k orders over 17 months, with seasonality, growth trend, churn/retention curves, and realistic financial relationships.</td></tr>
-    <tr><td>Forecasting</td><td>Seasonal-naive, moving-average, and Holt-Winters models compared via rolling-origin (temporal) validation; best model selected per metric by WAPE.</td></tr>
+    <tr><td>Data generation</td><td>Reproducible NumPy/pandas simulation (fixed seed) of ~12,000 customers, 320 restaurants, 520 riders and ~167k orders over 17 months, with seasonality, a growth trend, churn/retention curves and realistic financial relationships. v2 adds two tables: observed marketing spend by month × channel, and rider online/busy hours.</td></tr>
+    <tr><td>KPI layer</td><td>34 scorecard KPIs computed from the order table in src/analytics/kpis.py. Delivered orders = Delivered + Refunded. Contribution profit is before promotions (the model’s headline definition); “after promotions” subtracts promotion cost. The scorecard compares the latest month with the previous month.</td></tr>
+    <tr><td>Forecasting</td><td>Seasonal-naive, moving-average and Holt-Winters models compared via rolling-origin (temporal) validation; the best model is selected per metric by WAPE.</td></tr>
     <tr><td>Optimization</td><td>SciPy trust-constr solves a concave-response promotion-budget allocation across city × segment cells, maximizing incremental contribution profit under a fixed budget.</td></tr>
     <tr><td>Segmentation</td><td>Rule-based on realized recency / frequency / monetary value and subscription status — not random labels.</td></tr>
+    <tr><td>KPI windows</td><td>Customer sign-ups are generated over a fixed window that ends on 2026-08-23, so the final month holds only part of its sign-ups. Sign-up-driven KPIs (new customers, new-customer share, marketing spend, CAC, marketing % of revenue) therefore use a trailing 3-month window, tagged “3M”.</td></tr>
+    <tr><td>Limitations</td><td>All data is synthetic: patterns such as retention, channel economics and city margins are model outputs, not market evidence. Per-order unit economics use the last 3 months; LTV is the observed lifetime profit to date, not a projection. Marketing spend and rider hours are generated tables too, with built-in CAC inflation for paid channels, so the gap between “observed” and planning CAC is a modelled outcome, not market evidence.</td></tr>
   </table>
+  </div>
   <div class="foot-note" id="generated-at"></div>
 </section>
 
@@ -182,199 +337,523 @@
         <a href="https://miladshabani.ir" target="_blank" rel="noopener">miladshabani.ir</a> · <a href="https://github.com/Milad-Shabani" target="_blank" rel="noopener">github.com/Milad-Shabani</a>
       </div>
     </div>
+    <div class="foot-lang">🌐 Also available in <a href="fa/index.html" hreflang="fa" lang="fa">فارسی (Persian)</a></div>
   </div>
 </footer>
 
-<script src="data/novafood_data.js"></script>
+<script src="data/dashboard_data.js"></script>
 <script>
-const D = window.NOVAFOOD_DATA;
-const NAVY = "#1f2a44", TEAL = "#0f7c82", AMBER="#e08a2b", RED="#c94b4b", GREEN="#1f8b5b", MUTED="#9aa3b2";
-const PALETTE = [TEAL, NAVY, AMBER, GREEN, RED, "#7c6fd6", "#3f8fd6", "#c98bd6"];
+const LANG = "en";
+const T = {"meta_title": "Company 1 — Business Intelligence Dashboard", "meta_description": "Company 1 business intelligence dashboard: a synthetic online food-delivery marketplace case study with 34 executive KPIs, unit economics, customers, operations, marketing efficiency, forecasting and optimization.", "meta_font_stack": "'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif", "meta_lang_label": "Language", "meta_pct": "%", "meta_pct_axis": "%", "meta_separators": ".,", "hero_title": "Company 1: growth, margin and the cost of every order", "hero_sub": "A synthetic online food-delivery marketplace, followed from single orders to a management decision on growth versus margin. Not affiliated with any real company; methodology is in the Sources section.", "maker_name": "Milad Shabani", "maker_role": "Business Intelligence | Data Analytics | Data Engineering", "nav_overview": "Overview", "nav_financial": "Financials", "nav_unit": "Unit economics", "nav_customers": "Customers", "nav_restaurants": "Restaurants", "nav_operations": "Operations", "nav_marketing": "Marketing", "nav_forecast": "Forecast", "nav_optimization": "Optimization", "nav_sources": "Sources", "sec_overview_title": "Executive overview — KPI scorecard", "sec_overview_desc": "Latest month versus the previous month for 34 KPIs in seven groups. Each tile shows the value, the change, and a 12-month sparkline; green/red marks whether the move is good or bad for the business. Tiles tagged “3M” use a trailing 3-month window (sign-up-driven KPIs; see the Sources section). Hover a tile for its definition.", "sec_financial_title": "Financial performance", "sec_financial_desc": "Revenue, cost structure and what drives contribution margin. The headline contribution margin is shown before promotions; the after-promotion view charges the platform-funded discounts against it.", "sec_unit_title": "Unit economics", "sec_unit_desc": "What one delivered order earns and costs the platform — total, by cuisine, by restaurant tier and by payment method.", "sec_customers_title": "Customers & retention", "sec_customers_desc": "Acquisition quality, retention, segments, subscription impact and how concentrated revenue is across the customer base.", "sec_restaurants_title": "Restaurants & supply", "sec_restaurants_desc": "Which restaurants create profit, how concentrated volume is, and how supply keeps up with demand.", "sec_operations_title": "Delivery operations", "sec_operations_desc": "Speed, reliability, cancellations, demand peaks, city-level performance and rider productivity.", "sec_marketing_title": "Marketing efficiency & promotions", "sec_marketing_desc": "Observed acquisition spend by channel, CAC versus assumptions, LTV:CAC and the real cost of promotions.", "sec_forecast_title": "Forecast & strategic plan", "sec_forecast_desc": "Twelve-month outlook with 80% intervals and the plan required to reach +25% orders and +2 pp contribution margin.", "sec_optimization_title": "Scenarios & promotion-budget optimization", "sec_optimization_desc": "Downside / base / upside profit scenarios and the optimal allocation of a fixed promotion budget across city × segment cells.", "sec_sources_title": "Sources & methodology", "sec_sources_desc": "Everything on this page is computed from the synthetic dataset in this repository. No real company data is used.", "grp_growth": "Growth & scale", "grp_profitability": "Profitability", "grp_unit_economics": "Unit economics (per order)", "grp_customers": "Customers", "grp_operations": "Delivery operations", "grp_marketplace": "Marketplace health", "grp_marketing": "Marketing efficiency", "kpi_gmv": "GMV", "kpi_gmv_yoy": "GMV growth (YoY)", "kpi_delivered_orders": "Delivered orders", "kpi_active_customers": "Active customers", "kpi_orders_per_active_customer": "Orders per active customer", "kpi_platform_revenue": "Platform revenue", "kpi_take_rate": "Take rate", "kpi_contribution_profit": "Contribution profit", "kpi_contribution_margin": "Contribution margin", "kpi_contribution_per_order": "Contribution / order", "kpi_aov": "Avg. order value (AOV)", "kpi_revenue_per_order": "Revenue / order", "kpi_cost_to_serve": "Cost to serve / order", "kpi_delivery_fee_coverage": "Delivery-fee coverage", "kpi_promotion_burden": "Promotion burden", "kpi_new_customers": "New customers / month", "kpi_new_share": "New-customer share", "kpi_m1_retention": "Month-1 retention", "kpi_subscriber_share": "Subscriber order share", "kpi_on_time_rate": "On-time rate", "kpi_avg_delivery_minutes": "Avg. delivery time", "kpi_very_late_rate": "Very-late rate (>15 min)", "kpi_cancellation_rate": "Cancellation rate", "kpi_refund_rate": "Refund rate", "kpi_avg_rating": "Avg. rating", "kpi_active_restaurants": "Active restaurants", "kpi_orders_per_restaurant": "Orders / restaurant", "kpi_active_riders": "Active riders", "kpi_rider_utilization": "Rider utilization", "kpi_orders_per_rider_hour": "Orders / rider-hour", "kpi_marketing_spend": "Marketing spend / month", "kpi_blended_cac": "Blended CAC", "kpi_marketing_pct_revenue": "Marketing % of revenue", "kpi_discount_rate": "Discount rate (of GMV)", "def_gmv": "Gross merchandise value of delivered orders (food + delivery fee + service fee) in the month.", "def_gmv_yoy": "GMV compared with the same month one year earlier.", "def_delivered_orders": "Orders with status Delivered or Refunded.", "def_active_customers": "Distinct customers with at least one delivered order in the month.", "def_orders_per_active_customer": "Delivered orders divided by active customers — order frequency.", "def_platform_revenue": "Commission + service fee + 35% of delivery fee, less the refund offset.", "def_take_rate": "Platform revenue as a share of GMV.", "def_contribution_profit": "Platform revenue − rider cost − payment processing − 50% of refunds. Headline definition: before promotions.", "def_contribution_margin": "Contribution profit as a share of platform revenue (before promotions).", "def_contribution_per_order": "Contribution profit divided by delivered orders.", "def_aov": "GMV divided by delivered orders.", "def_revenue_per_order": "Platform revenue divided by delivered orders.", "def_cost_to_serve": "Platform revenue − contribution profit, per delivered order (rider + payment + refund cost).", "def_delivery_fee_coverage": "Delivery fees collected as a share of rider cost — how much of delivery the customer pays for.", "def_promotion_burden": "Promotion cost (discounts funded by the platform) as a share of platform revenue.", "def_new_customers": "Customers who signed up in the month and ordered in it; average of the last 3 months.", "def_new_share": "New customers as a share of active customers; last 3 months pooled.", "def_m1_retention": "Of customers who signed up in the previous month, the share who ordered this month.", "def_subscriber_share": "Share of delivered orders placed by subscribed customers.", "def_on_time_rate": "Delivered orders arriving within 5 minutes of the estimate.", "def_avg_delivery_minutes": "Average actual delivery time of delivered orders.", "def_very_late_rate": "Delivered orders arriving more than 15 minutes late.", "def_cancellation_rate": "Cancelled orders as a share of all orders placed.", "def_refund_rate": "Refunded orders as a share of delivered orders.", "def_avg_rating": "Average customer rating (1–5) of delivered orders.", "def_active_restaurants": "Restaurants with at least one delivered order in the month.", "def_orders_per_restaurant": "Delivered orders divided by active restaurants.", "def_active_riders": "Riders who completed at least one order in the month.", "def_rider_utilization": "Busy hours as a share of online hours across all riders.", "def_orders_per_rider_hour": "Delivered orders divided by rider online hours.", "def_marketing_spend": "Observed acquisition spend across channels; monthly average of the last 3 months.", "def_blended_cac": "Marketing spend divided by sign-ups; last 3 months pooled.", "def_marketing_pct_revenue": "Marketing spend as a share of platform revenue; last 3 months pooled.", "def_discount_rate": "Discount amount as a share of GMV.", "no_prior": "no prior-month data", "u_pp": "pp", "u_min": "min", "u_km": "km", "win_3m": "3M", "win_3m_title": "Trailing 3-month window — sign-ups in the final month are truncated, so a single month would show a false drop.", "ins_overview": "<b>GMV is up {yoy} year over year<\/b> and orders are growing at an annualized {growth}. The headline contribution margin is <b>{margin}<\/b> before promotions, but only <b>{after}<\/b> once promotion cost is charged — promotions consume {promo} of platform revenue. The strongest city is <b>{best_city}<\/b> ({best_m} margin); the weakest is <b>{worst_city}<\/b> ({worst_m}).", "ins_financial": "Contribution margin (before promotions) moved from <b>{first}<\/b> in the first month to <b>{latest}<\/b> now. After promotion cost it is <b>{after}<\/b>: growth is being bought with discounts, so promotion efficiency is the main margin lever.", "ins_unit": "Each delivered order earns <b>{rev}<\/b> of platform revenue and costs <b>{cost}<\/b> to serve, leaving <b>{contrib}<\/b> of contribution. Promotions then take <b>{promo}<\/b> per order, giving <b>{after}<\/b> after promotions. Delivery fees cover only {cover} of rider cost.", "ins_customers": "The best-returning acquisition channel is <b>{channel}<\/b> (LTV:CAC {ratio}). Retention is {m1} after one month and {m3} after three. The top 20% of customers generate <b>{top20}<\/b> of GMV. Subscribers churn at {sub_churn} versus {non_churn} for non-subscribers.", "ins_restaurants": "Volume is concentrated in a minority of restaurants. “Volume traps” bring high revenue at low margin and are the first candidates for commission or delivery-cost renegotiation; “Stars” should be protected.", "ins_operations": "Demand peaks at {peak} — those three hours carry <b>{peak_share}<\/b> of orders. Network-wide, {ontime} of orders arrive on time; the weakest city is <b>{worst_city}<\/b> at {worst_ontime}.", "ins_marketing": "Paid Social and Paid Search take <b>{paid}<\/b> of acquisition spend. Observed LTV:CAC is best for <b>{best}<\/b> ({best_ratio}) and weak for Paid Social ({ps}) and Paid Search ({psr}); observed Paid Search CAC is {cac_up} above the planning assumption.", "ins_forecast": "The selected model for delivered orders is <b>{model}<\/b>; the 12-month base case ends at {end} orders per month. Reaching +25% orders and +2 pp margin needs a combined plan, not a single lever.", "ins_optimization": "Reallocating a fixed budget of {budget} across the highest-response city × segment cells lifts modelled incremental profit by <b>{gain}<\/b> (from {from} to {to}).", "waterfall_cap": "Average per delivered order, {window}. Average order value {aov}.", "wf_revenue": "Platform<br>revenue", "wf_rider": "Rider<br>cost", "wf_payment": "Payment<br>processing", "wf_refund": "Refunds<br>(50%)", "wf_contribution": "Contribution", "wf_promo": "Promotions", "wf_after": "After<br>promotions", "c_gmv_orders": "GMV and delivered orders by month", "c_city_profit": "Contribution profit by city", "c_margin_promo": "Contribution margin: before vs. after promotions", "c_margin_promo_cap": "The gap between the lines is the promotion cost, as a share of platform revenue.", "c_revenue_mix": "Revenue mix (last 3 months)", "c_cost_structure": "Cost structure vs. platform revenue", "c_drivers": "Margin driver decomposition (first vs. last month)", "c_waterfall": "Unit-economics waterfall — $ per order", "c_rev_vs_cost": "Revenue vs. cost to serve per order", "c_cuisine": "Contribution margin by cuisine", "c_tier": "By restaurant tier", "c_payment": "By payment method", "c_new_returning": "Active customers: new vs. returning", "c_m1_ret": "Month-1 retention by month", "c_segments": "Customers by segment", "c_segment_profit": "Share of customers vs. share of profit", "c_segment_profit_cap": "Segments whose profit share exceeds their customer share are over-earning.", "c_subscription": "Subscribers vs. non-subscribers", "c_concentration": "Revenue concentration (Lorenz curve)", "c_cohort": "Cohort retention heatmap (% of sign-up cohort still ordering)", "c_quadrant": "Restaurant GMV vs. contribution margin (each dot = one restaurant)", "c_quadrant_bar": "Restaurants by quadrant", "c_supply": "Supply: active restaurants and orders per restaurant", "c_ontime": "On-time rate", "c_cancel": "Cancellation rate", "c_heatmap": "Demand heatmap — orders by weekday × hour", "c_heatmap_cap": "Average delivered orders per day, last 3 months.", "c_cancel_reasons": "Why orders are cancelled", "c_city_scorecard": "City scorecard", "c_city_scorecard_cap": "Green = better, red = worse within each column.", "c_rider": "Rider productivity", "c_vehicle": "By vehicle type", "c_delay_rating": "Customer rating by delivery delay", "c_spend_channel": "Observed marketing spend by channel", "c_cac_trend": "Blended CAC by month", "c_cac_compare": "CAC: planning assumption vs. observed (last 3 months)", "c_ltvcac": "Observed LTV : CAC by channel", "c_ltvcac_cap": "Dashed line = break-even (1.0). A healthy channel is typically 3 or higher.", "c_discount": "Promotion intensity", "c_promo": "Orders with vs. without a promotion", "c_promo_cap": "Contribution after promotions is the true per-order profit of a promoted order.", "c_forecast": "Delivered orders — history, forecast and 80% interval", "c_models": "Model selection (rolling-origin validation)", "c_plan": "Strategic plan: +25% orders and +2 pp margin", "c_scenario": "Scenarios — contribution profit", "c_optimization": "Optimization: baseline vs. optimal spend (top cells)", "h_metric": "Metric", "h_city": "City", "h_tier": "Tier", "h_payment": "Payment method", "h_vehicle": "Vehicle", "h_orders": "Orders", "h_share": "Share", "h_aov": "AOV", "h_rev_order": "Revenue / order", "h_contrib_order": "Contribution / order", "h_margin": "Margin", "h_rating": "Rating", "h_refund_rate": "Refund rate", "h_customers": "Customers", "h_orders_per_customer": "Orders per customer", "h_orders_per_month": "Orders per month", "h_ltv": "Lifetime profit / customer", "h_discount_dep": "Discount dependency", "h_churn": "Churn rate", "h_ontime": "On-time", "h_deliv_min": "Delivery min", "h_cancel": "Cancel rate", "h_rider_order": "Rider cost / order", "h_cost_km": "Cost / km", "h_util": "Utilization", "h_with_promo": "With promotion", "h_no_promo": "No promotion", "h_order_share": "Share of orders", "h_promo_order": "Promotion cost / order", "h_after_promo": "Contribution after promotions / order", "h_selected_model": "Selected model", "l_gmv": "GMV", "l_gmv_usd": "GMV ($)", "l_orders": "Delivered orders", "l_profit_period": "Contribution profit ($, full period)", "l_cm_before": "Before promotions", "l_cm_after": "After promotions", "l_margin_pct": "Margin (%)", "l_commission": "Commission", "l_delivery_fee": "Delivery fee", "l_service_fee": "Service fee", "l_rider_cost": "Rider cost", "l_payment_cost": "Payment processing", "l_promo_cost": "Promotions", "l_refunds": "Refunds", "l_platform_revenue": "Platform revenue", "l_usd_month": "$ per month", "l_driver_pp": "Change in margin (pp)", "l_usd_order": "$ per order", "l_rev_order": "Revenue / order", "l_cost_order": "Cost to serve / order", "l_rider_order": "Rider cost / order", "l_promo_order": "Promotion cost / order", "l_active_customers": "Active customers", "l_returning": "Returning", "l_activated_new": "New (signed up and ordered)", "l_m1": "Month-1 retention", "l_m1_axis": "Retained (%)", "l_customer_share": "Share of customers", "l_profit_share": "Share of profit", "l_share_pct": "Share (%)", "l_equality": "Perfect equality", "l_cum_gmv": "Cumulative GMV", "l_cum_gmv_axis": "Cumulative share of GMV (%)", "l_top_customers": "Customers, ranked by GMV (% of base)", "l_top20_note": "Top 20% → {v}% of GMV", "l_month_short": "M", "l_gmv_month": "GMV per month ($)", "l_active_rest": "Active restaurants", "l_orders_rest": "Orders per restaurant", "l_very_late": "Very late (>15 min)", "l_refund_rate": "Refund rate", "l_orders_day": "orders/day", "l_hour": "Hour of day", "l_per100": "Cancellations per 100 orders", "l_utilization": "Utilization (%)", "l_orders_hour": "Orders / rider-hour", "l_avg_rating": "Average rating", "l_blended_cac": "Blended CAC", "l_usd_signup": "$ per sign-up", "l_cac_assumed": "Planning assumption", "l_cac_observed": "Observed", "l_promo_orders": "Orders with a promotion (%)", "l_promo_rev": "Promotion cost (% of revenue)", "l_discount_gmv": "Discount (% of GMV)", "l_actuals": "Actual", "l_upper80": "Upper 80%", "l_interval80": "80% interval", "l_forecast_base": "Forecast (base)", "l_verdict": "Verdict", "l_downside": "Downside", "l_base": "Base", "l_upside": "Upside", "l_profit_usd": "Contribution profit ($)", "l_baseline_spend": "Baseline spend", "l_optimized_spend": "Optimized spend", "s_customers": "Customers", "s_customers_sub": "{n} have ordered", "s_active60": "Active (60 days)", "s_active60_sub": "Ordered in the last 60 days", "s_at_risk": "At risk", "s_at_risk_sub": "Last order 60–90 days ago", "s_churned": "Churned", "s_churned_sub": "No order for 90+ days", "s_orders_cust": "Orders / customer", "s_orders_cust_sub": "Lifetime, ordering customers", "s_ltv": "Lifetime profit", "s_ltv_sub": "per customer · lifetime GMV {gmv}", "r_with_orders": "Restaurants with orders", "r_with_orders_sub": "Delivered at least one order", "r_top10": "Top-10 share of GMV", "r_top10_sub": "Ten largest restaurants", "r_top20": "Top-20% share of GMV", "r_top20_sub": "Pareto concentration", "r_rating": "Avg. restaurant rating", "r_rating_sub": "Delivered orders, 1–5", "o_peak": "Peak-hours share", "o_peak_sub": "Busiest 3 hours: {h}", "o_weekend": "Weekend share", "o_weekend_sub": "Orders on Sat/Sun", "o_holiday": "Holiday lift", "o_holiday_sub": "Daily orders vs. non-holidays", "o_eta": "ETA error", "o_eta_sub": "Avg. absolute gap vs. estimate", "o_distance": "Avg. distance", "o_distance_sub": "Delivered orders", "m_total_spend": "Marketing spend", "m_total_spend_sub": "Whole period, observed", "m_signups": "Sign-ups", "m_signups_sub": "Whole period", "m_paid_share": "Paid share of spend", "m_paid_share_sub": "Paid Social + Paid Search", "m_promo_share": "Orders with a promotion", "m_promo_share_sub": "Average discount {d} of food value", "p_cur_orders": "Current annualized orders", "p_tgt_orders": "Target annualized orders (+25%)", "p_cur_margin": "Current contribution margin", "p_tgt_margin": "Target contribution margin (+2 pp)", "p_promo_burden": "Promotion burden (latest month)", "src_h_component": "Component", "src_h_approach": "Approach", "src_data_k": "Data generation", "src_data_v": "Reproducible NumPy/pandas simulation (fixed seed) of ~12,000 customers, 320 restaurants, 520 riders and ~167k orders over 17 months, with seasonality, a growth trend, churn/retention curves and realistic financial relationships. v2 adds two tables: observed marketing spend by month × channel, and rider online/busy hours.", "src_kpi_k": "KPI layer", "src_kpi_v": "34 scorecard KPIs computed from the order table in src/analytics/kpis.py. Delivered orders = Delivered + Refunded. Contribution profit is before promotions (the model’s headline definition); “after promotions” subtracts promotion cost. The scorecard compares the latest month with the previous month.", "src_fc_k": "Forecasting", "src_fc_v": "Seasonal-naive, moving-average and Holt-Winters models compared via rolling-origin (temporal) validation; the best model is selected per metric by WAPE.", "src_opt_k": "Optimization", "src_opt_v": "SciPy trust-constr solves a concave-response promotion-budget allocation across city × segment cells, maximizing incremental contribution profit under a fixed budget.", "src_seg_k": "Segmentation", "src_seg_v": "Rule-based on realized recency / frequency / monetary value and subscription status — not random labels.", "src_def_k": "KPI windows", "src_def_v": "Customer sign-ups are generated over a fixed window that ends on 2026-08-23, so the final month holds only part of its sign-ups. Sign-up-driven KPIs (new customers, new-customer share, marketing spend, CAC, marketing % of revenue) therefore use a trailing 3-month window, tagged “3M”.", "src_lim_k": "Limitations", "src_lim_v": "All data is synthetic: patterns such as retention, channel economics and city margins are model outputs, not market evidence. Per-order unit economics use the last 3 months; LTV is the observed lifetime profit to date, not a projection. Marketing spend and rider hours are generated tables too, with built-in CAC inflation for paid channels, so the gap between “observed” and planning CAC is a modelled outcome, not market evidence.", "generated_at": "Data generated: {d}", "names": {"Metroville": "Metroville", "Porthaven": "Porthaven", "Rivertown": "Rivertown", "Lakeside City": "Lakeside City", "Hillcrest": "Hillcrest", "Bayshore": "Bayshore", "Northfield": "Northfield", "Sunview": "Sunview", "At Risk": "At Risk", "Churned": "Churned", "High Value": "High Value", "Loyal": "Loyal", "New": "New", "Occasional": "Occasional", "Price Sensitive": "Price Sensitive", "Subscription": "Subscription", "Organic/Referral": "Organic / Referral", "Paid Social": "Paid Social", "Paid Search": "Paid Search", "Push/CRM": "Push / CRM", "Partnership": "Partnership", "Burgers": "Burgers", "Sandwiches": "Sandwiches", "BBQ/Grill": "BBQ / Grill", "Cafe/Breakfast": "Cafe / Breakfast", "Asian": "Asian", "Healthy/Salads": "Healthy / Salads", "Desserts & Bakery": "Desserts & Bakery", "Vegan": "Vegan", "Middle Eastern": "Middle Eastern", "Seafood": "Seafood", "Mexican": "Mexican", "Pizza": "Pizza", "Indian": "Indian", "Fast Food": "Fast Food", "Italian": "Italian", "Card": "Card", "Wallet": "Wallet", "Cash on Delivery": "Cash on Delivery", "BNPL": "BNPL", "Bike": "Bike", "Scooter": "Scooter", "Car": "Car", "Budget": "Budget", "Mid": "Mid", "Premium": "Premium", "Subscribed": "Subscribed", "Not Subscribed": "Not subscribed", "holt_winters": "Holt-Winters", "moving_average": "Moving average", "seasonal_naive": "Seasonal naive", "delivered_orders": "Delivered orders", "gmv": "GMV", "platform_revenue": "Platform revenue", "contribution_profit": "Contribution profit", "Discount rate (of GMV)": "Discount rate (of GMV)", "Refund rate": "Refund rate", "Revenue mix / take-rate": "Revenue mix / take rate", "Payment processing rate": "Payment processing rate", "Rider cost rate (of revenue)": "Rider cost rate (of revenue)", "On time or early": "On time<br>or early", "1-5 min late": "1–5 min<br>late", "5-10 min late": "5–10 min<br>late", "10-20 min late": "10–20 min<br>late", "20+ min late": "20+ min<br>late", "Restaurant Rejected": "Restaurant rejected", "Customer Cancelled": "Customer cancelled", "No Rider Available": "No rider available", "Long Wait": "Long wait"}, "quad": {"Star": "Star", "Volume Trap": "Volume trap", "Niche Profit": "Niche profit", "Review": "Review"}, "days": {"Mon": "Mon", "Tue": "Tue", "Wed": "Wed", "Thu": "Thu", "Fri": "Fri", "Sat": "Sat", "Sun": "Sun"}, "verdicts": {"Achievable, but only with a combined plan -- no single lever gets there alone. The model shows the target requires simultaneous discount discipline, delivery-cost efficiency, and a modest take-rate increase, not organic growth alone.": "Achievable, but only with a combined plan — no single lever gets there alone. The model shows the target requires simultaneous discount discipline, delivery-cost efficiency and a modest take-rate increase, not organic growth alone."}, "u_to": "to", "meta_display_stack": "'Bricolage Grotesque', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif", "receipt_title": "Average delivered order", "receipt_aov": "Average order value", "chip_orders": "{n} delivered orders", "chip_cities": "{n} cities", "chip_asof": "Data through {m}", "grp_count": "{n} KPIs"};
+const D = window.DASHBOARD_DATA;
+const FA = LANG === "fa";
+
+/* ------------------------------------------------------------------ helpers */
+const NM = T.names || {};
+const nm = s => (s in NM) ? NM[s] : String(s).replace(/_/g, " ");
+const tpl = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m));
+const sepFix = s => FA ? s.replace(/,/g, "٬").replace(/\./g, "٫") : s;
+const nf = (v, d = 0) => (v == null || isNaN(v)) ? "–" : (v < 0 && Number(Math.abs(v).toFixed(d)) !== 0 ? "−" : "") + sepFix(Math.abs(Number(v)).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}));
+const money = (v, d = 0) => v == null ? "–" : (v < 0 ? "−" : "") + "$" + nf(Math.abs(v), d);
+const pc = (v, d = 1) => v == null ? "–" : nf(v, d) + T.meta_pct;
+const ltr = s => `<span class="num">${s}</span>`;
+const $ = id => document.getElementById(id);
+const last = a => a[a.length - 1];
+
+const NAVY = "#1f2a44", TEAL = "#0f7c82", AMBER = "#b86a12", RED = "#b83c3c", GREEN = "#1a7a50", MUTED = "#9aa3b2";
+/* categorical identity colours: validated reference palette (colour-blind separation checked) */
+const CAT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#6250d6", "#008300"];
 const layoutBase = {
-  font:{family:"-apple-system,Segoe UI,Roboto,Arial,sans-serif", color:"#1a2233", size:12},
-  margin:{l:50,r:20,t:10,b:40}, paper_bgcolor:"#fff", plot_bgcolor:"#fff",
-  legend:{orientation:"h", y:-0.2}, hovermode:"x unified"
+  font: {family: T.meta_font_stack, color: "#2b3550", size: 12},
+  margin: {l: 56, r: 20, t: 10, b: 44}, paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+  legend: {orientation: "h", y: -0.22}, hovermode: "x unified", separators: T.meta_separators,
+  hoverlabel: {bgcolor: "#fff", bordercolor: "#d5dae4", font: {family: T.meta_font_stack, color: "#131a2b", size: 12}},
+  xaxis: {gridcolor: "#edf0f5", zeroline: false, ticks: "outside", ticklen: 8, tickcolor: "rgba(0,0,0,0)"}, yaxis: {gridcolor: "#edf0f5", zeroline: false, ticks: "outside", ticklen: 6, tickcolor: "rgba(0,0,0,0)"}
 };
-const cfg = {displayModeBar:false, responsive:true};
+const cfg = {displayModeBar: false, responsive: true};
+/* Persian: Gregorian month names in Persian script on date axes, and plain grouped numbers instead of SI suffixes ("200k") */
+const FA_MONTHS = ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"];
+const monthLabel = v => { const [y, m] = v.split("-"); return FA ? FA_MONTHS[+m - 1] + " " + y : v; };
+const isMonth = v => typeof v === "string" && /^\d{4}-\d{2}(-\d{2})?$/.test(v);
+function localizeAxes(traces, L) {
+  ["", "2"].forEach(sfx => {
+    ["x", "y"].forEach(k => {
+      const axisKey = k + "axis" + sfx, ref = k + sfx;
+      const own = traces.filter(t => (t[k + "axis"] || k) === ref);
+      const vals = own.flatMap(t => Array.isArray(t[k]) ? t[k] : []);
+      if (!vals.length) return;
+      const A = L[axisKey] = {...(L[axisKey] || {})};
+      if (isMonth(vals[0])) {
+        if (A.tickvals || own.some(t => t.type === "heatmap")) return;
+        const uniq = [...new Set(vals)].sort(); const step = Math.max(1, Math.round(uniq.length / 6));
+        const tv = uniq.filter((_, i) => (uniq.length - 1 - i) % step === 0);
+        A.tickmode = "array"; A.tickvals = tv;
+        A.ticktext = tv.map(v => { const [y, m] = v.split("-"); return FA_MONTHS[+m - 1] + " " + y; });
+      } else if (typeof vals[0] === "number" && !A.tickformat && !A.ticksuffix && A.type !== "log" && !(own[0].type === "pie")) {
+        A.tickformat = ",.4~f";
+      }
+    });
+  });
+  traces.forEach(t => { if (t.type === "heatmap") t.colorbar = {...(t.colorbar || {}), tickformat: ",.4~f"}; });
+}
+const rle = s => (FA && typeof s === "string" && /[\u0600-\u06FF]/.test(s)) ? "\u202B" + s + "\u202C" : s;
+function plot(id, traces, layout = {}) {
+  const L = {...layoutBase, ...layout};
+  L.xaxis = {...layoutBase.xaxis, ...(layout.xaxis || {})};
+  L.yaxis = {...layoutBase.yaxis, ...(layout.yaxis || {})};
+  if (FA) {
+    if (!traces.some(t => t.type === "pie")) localizeAxes(traces, L);
+    Object.keys(L).forEach(k => {
+      if (/^[xy]axis\d*$/.test(k) && L[k] && L[k].title) L[k] = {...L[k], title: typeof L[k].title === "string" ? rle(L[k].title) : {...L[k].title, text: rle(L[k].title.text)}};
+    });
+    if (L.annotations) L.annotations = L.annotations.map(a => ({...a, text: rle(a.text)}));
+    traces.forEach(t => { if (t.name) t.name = rle(t.name); if (t.colorbar && t.colorbar.title) t.colorbar = {...t.colorbar, title: rle(t.colorbar.title)}; });
+  }
+  Plotly.newPlot(id, traces, L, cfg);
+}
+/* two measures with different units -> two stacked panels sharing the x axis (never a dual axis) */
+function stacked2(id, top, bottom, titles, extra = {}) {
+  const t1 = top.map(t => ({...t, xaxis: "x", yaxis: "y"}));
+  const t2 = bottom.map(t => ({...t, xaxis: "x2", yaxis: "y2"}));
+  plot(id, [...t1, ...t2], {
+    grid: {rows: 2, columns: 1, pattern: "independent"},
+    xaxis: {domain: [0, 1], anchor: "y", showticklabels: false, gridcolor: "#edf0f5"},
+    xaxis2: {domain: [0, 1], anchor: "y2", gridcolor: "#edf0f5"},
+    yaxis: {domain: [0.56, 1], anchor: "x", title: titles[0], gridcolor: "#edf0f5", zeroline: false, ...(extra.y1 || {})},
+    yaxis2: {domain: [0, 0.44], anchor: "x2", title: titles[1], gridcolor: "#edf0f5", zeroline: false, ...(extra.y2 || {})},
+    margin: {l: 64, r: 20, t: 10, b: 44}
+  });
+}
+function table(id, headers, rows, numCols = []) {
+  const th = headers.map((h, i) => `<th class="${numCols.includes(i) ? "n" : ""}">${h}</th>`).join("");
+  const tr = rows.map(r => "<tr>" + r.map((c, i) => `<td class="${numCols.includes(i) ? "n" : ""}">${c}</td>`).join("") + "</tr>").join("");
+  $(id).innerHTML = `<table class="simple"><tr>${th}</tr>${tr}</table>`;
+}
+function shade(v, min, max, higherBetter = true) {
+  if (v == null || max === min) return "";
+  let g = (v - min) / (max - min); if (!higherBetter) g = 1 - g;
+  const a = Math.abs(g - 0.5) * 0.55;
+  return `style="background:${g >= 0.5 ? `rgba(26,122,80,${a})` : `rgba(184,60,60,${a})`}"`;
+}
+function shadedCol(vals, higherBetter, fmt) {
+  const nums = vals.filter(v => v != null); const mn = Math.min(...nums), mx = Math.max(...nums);
+  return vals.map(v => ({html: ltr(fmt(v)), attr: shade(v, mn, mx, higherBetter)}));
+}
+function miniTiles(id, items) {
+  $(id).innerHTML = items.map(([label, value, sub]) => `
+    <div class="tile mini"><div class="t-label">${label}</div><div class="t-value">${value}</div>${sub ? `<div class="t-sub">${sub}</div>` : ""}</div>`).join("");
+}
+function sparkline(values, color) {
+  const W = 120, H = 26, P = 3, pts = values.map((v, i) => v == null ? null : [i, v]).filter(Boolean);
+  if (pts.length < 2) return "";
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const X = x => P + (x - x0) / Math.max(x1 - x0, 1) * (W - 2 * P);
+  const Y = y => H - P - (y - y0) / Math.max(y1 - y0, 1e-9) * (H - 2 * P);
+  const d = pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+  const lp = last(pts);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><circle cx="${X(lp[0]).toFixed(1)}" cy="${Y(lp[1]).toFixed(1)}" r="2.4" fill="${color}" stroke="#fff" stroke-width="1"/></svg>`;
+}
+function fmtKpi(it, v) {
+  switch (it.fmt) {
+    case "money0": return money(v, 0); case "money2": return money(v, 2);
+    case "int": return nf(v, 0); case "pct1": return pc(v, 1);
+    case "dec1": return nf(v, 1); case "dec2": return nf(v, 2);
+    case "min1": return nf(v, 1) + " " + T.u_min;
+  }
+  return nf(v, 2);
+}
 
-function fmtMoney(v){ if(v==null) return "-"; return "$"+Number(v).toLocaleString(undefined,{maximumFractionDigits:0}); }
-function fmtNum(v){ if(v==null) return "-"; return Number(v).toLocaleString(); }
+/* ---------------------------------------------------------------- scorecard */
+const SC = D.scorecard;
+const scById = {}; SC.groups.forEach(g => g.items.forEach(it => scById[it.key] = it));
+$("scorecard").innerHTML = SC.groups.map(g => `
+  <div class="score-group">
+    <div><h3 class="sub-h">${T["grp_" + g.key]}</h3><div class="g-count">${tpl(T.grp_count, {n: ltr(nf(g.items.length))})}</div></div>
+    <div class="tiles">${g.items.map(it => {
+      const d = it.delta;
+      let cls = "", arrow = "●";
+      if (d != null && Math.abs(d) >= 0.05) {
+        arrow = d > 0 ? "▲" : "▼";
+        if (it.good === "up") cls = d > 0 ? "good" : "bad"; else if (it.good === "down") cls = d < 0 ? "good" : "bad";
+      }
+      const dtxt = d == null ? T.no_prior : `${arrow} ${ltr(nf(Math.abs(d), 1) + (it.delta_kind === "pp" ? " " + T.u_pp : T.meta_pct))}`;
+      const color = cls === "bad" ? RED : cls === "good" ? GREEN : TEAL;
+      return `<div class="tile ${cls}" title="${T["def_" + it.key]}">
+        <div class="t-label"><span>${T["kpi_" + it.key]}</span>${it.window === "3M" ? `<span class="win" title="${T.win_3m_title}">${T.win_3m}</span>` : ""}</div>
+        <div class="t-value">${ltr(fmtKpi(it, it.value))}</div>
+        <div class="t-delta ${cls}">${dtxt}</div>${sparkline(it.spark, color)}</div>`;
+    }).join("")}</div>
+  </div>`).join("");
 
-// ---------- KPI cards ----------
-const k = D.kpis;
-const kpiDefs = [
-  ["GMV (trailing month)", fmtMoney(k.gmv), k.gmv_growth_pct!=null ? (k.gmv_growth_pct>=0?"up":"down") : null, k.gmv_growth_pct!=null? (k.gmv_growth_pct>=0?"▲ ":"▼ ")+Math.abs(k.gmv_growth_pct)+"% MoM":""],
-  ["Delivered Orders", fmtNum(k.orders), null, "Annualized growth ~"+k.orders_growth_annualized_pct+"%"],
-  ["Contribution Margin %", k.contribution_margin_pct+"%", null, "Trailing 3-month average"],
-  ["Active Customers", fmtNum(k.active_customers), null, "Trailing month"],
-  ["Platform Revenue", fmtMoney(k.revenue), null, "Trailing month"],
-  ["Contribution Profit", fmtMoney(k.contribution_profit), null, "Trailing month"],
-  ["Average Order Value", fmtMoney(k.aov), null, "Trailing month"],
-  ["On-Time Delivery Rate", k.on_time_rate+"%", null, "Trailing month"],
-];
-document.getElementById("kpi-grid").innerHTML = kpiDefs.map(([label,val,cls,delta])=>`
-  <div class="kpi"><div class="label">${label}</div><div class="value">${val}</div>${delta?`<div class="delta ${cls||''}">${delta}</div>`:""}</div>
-`).join("");
+/* ------------------------------------------------------------------- hero */
+(function () {
+  const W = D.unit_econ.waterfall, strip = s => s.replace(/<br>/g, " ");
+  const win = D.unit_econ.window.split(" to ").map(ltr).join(" " + T.u_to + " ");
+  const row = (label, v, cls = "") => `<div class="r-row ${cls}"><span>${strip(label)}</span><span class="dots"></span><span class="v">${ltr(money(v, 2))}</span></div>`;
+  const parts = [
+    `<div class="r-head">${T.receipt_title}</div><div class="r-sub">${win}</div><div class="r-dash"></div>`,
+    row(T.wf_revenue, W.revenue_per_order), row(T.wf_rider, W.rider_cost, "neg"), row(T.wf_payment, W.payment_cost, "neg"), row(T.wf_refund, W.refund_cost, "neg"),
+    `<div class="r-rule"></div>`, row(T.wf_contribution, W.contribution_per_order, "strong"),
+    row(T.wf_promo, W.promotion_cost, "neg"),
+    `<div class="r-rule double"></div>`, row(T.wf_after, W.contribution_after_promo_per_order, "strong" + (W.contribution_after_promo_per_order < 0 ? " neg" : "")),
+    `<div class="r-foot">${T.receipt_aov}: ${ltr(money(W.aov, 2))}</div>`,
+  ];
+  $("receipt").innerHTML = parts.map((h, i) => h.replace(/^<div /, `<div style="--i:${i}" `)).join("");
+  const orders = D.financial.delivered_orders.reduce((a, b) => a + b, 0);
+  $("hero-chips").innerHTML = [
+    tpl(T.chip_orders, {n: ltr(nf(orders))}), tpl(T.chip_cities, {n: ltr(nf(D.cities.names.length))}),
+    tpl(T.chip_asof, {m: monthLabel(SC.as_of)}),
+  ].map(t => `<span class="chip">${t}</span>`).join("");
+})();
 
-document.getElementById("insight-overview").innerHTML =
-  `<b>Read:</b> NOVAFOOD is growing orders at roughly <b>${k.orders_growth_annualized_pct}% annualized</b> while holding contribution margin near <b>${k.contribution_margin_pct}%</b> — the central management question is whether that margin holds as growth continues. ${D.findings.highest_margin_city.city} runs the strongest unit economics (${D.findings.highest_margin_city.contribution_margin_pct}% margin); ${D.findings.weakest_margin_city.city} is the priority market for review (${D.findings.weakest_margin_city.contribution_margin_pct}% margin).`;
+const E = D.monthly_ext, F = D.financial, K = D.kpis, FD = D.findings;
+const sc = k => scById[k].value;
+const lastE = k => last(E[k]);
 
-// ---------- Overview trend ----------
-Plotly.newPlot("chart-overview-trend", [
-  {x:D.financial.months, y:D.financial.gmv, type:"bar", name:"GMV ($)", marker:{color:TEAL, opacity:.85}},
-  {x:D.financial.months, y:D.financial.delivered_orders, type:"scatter", mode:"lines+markers", name:"Delivered Orders", yaxis:"y2", line:{color:NAVY,width:3}}
-], {...layoutBase, yaxis:{title:"GMV ($)"}, yaxis2:{title:"Orders", overlaying:"y", side:"right", showgrid:false}}, cfg);
+$("insight-overview").innerHTML = tpl(T.ins_overview, {
+  yoy: ltr(nf(sc("gmv_yoy"), 0) + T.meta_pct), growth: ltr(nf(K.orders_growth_annualized_pct, 0) + T.meta_pct),
+  margin: ltr(pc(K.contribution_margin_pct, 1)), after: ltr(pc(lastE("contribution_after_promo_margin_pct"), 0)),
+  promo: ltr(pc(sc("promotion_burden"), 0)),
+  best_city: nm(FD.highest_margin_city.city), best_m: ltr(pc(FD.highest_margin_city.contribution_margin_pct, 1)),
+  worst_city: nm(FD.weakest_margin_city.city), worst_m: ltr(pc(FD.weakest_margin_city.contribution_margin_pct, 1)),
+});
 
-Plotly.newPlot("chart-overview-city", [{
-  x:D.cities.contribution_profit, y:D.cities.names, type:"bar", orientation:"h",
-  marker:{color:D.cities.contribution_profit.map(v=>v>=0?GREEN:RED)},
-}], {...layoutBase, xaxis:{title:"Contribution Profit ($, period total)"}, margin:{l:120,r:20,t:10,b:40}}, cfg);
+/* GMV (bars) and orders (line): two panels, one x axis */
+stacked2("c-gmv-orders",
+  [{x: F.months, y: F.gmv, type: "bar", name: T.l_gmv, marker: {color: TEAL}, showlegend: false}],
+  [{x: F.months, y: F.delivered_orders, type: "scatter", mode: "lines+markers", name: T.l_orders, line: {color: NAVY, width: 3}, showlegend: false}],
+  [T.l_gmv_usd, T.l_orders]);
 
-// ---------- Financial ----------
-const marginLatest = D.financial.contribution_margin_pct.at(-1);
-const marginFirst = D.financial.contribution_margin_pct[0];
-document.getElementById("insight-financial").innerHTML =
-  `<b>Read:</b> Contribution margin moved from <b>${marginFirst}%</b> to <b>${marginLatest}%</b> across the reporting window. The driver chart below shows an approximate first-order decomposition of that change — discount rate, delivery (rider) cost rate, payment processing, refunds, and take-rate/mix.`;
+plot("c-city-profit", [{
+  x: D.cities.contribution_profit, y: D.cities.names.map(nm), type: "bar", orientation: "h",
+  marker: {color: D.cities.contribution_profit.map(v => v >= 0 ? GREEN : RED)},
+  hovertemplate: "%{y}: $%{x:,.0f}<extra></extra>",
+}], {xaxis: {title: T.l_profit_period}, margin: {l: 110, r: 20, t: 10, b: 44}, hovermode: "closest", yaxis: {autorange: "reversed"}});
 
-Plotly.newPlot("chart-margin-trend", [{
-  x:D.financial.months, y:D.financial.contribution_margin_pct, type:"scatter", mode:"lines+markers", line:{color:TEAL,width:3}, fill:"tozeroy", fillcolor:"rgba(15,124,130,0.08)"
-}], {...layoutBase, yaxis:{title:"Contribution Margin %", ticksuffix:"%"}}, cfg);
+/* ---------------------------------------------------------------- financial */
+$("insight-financial").innerHTML = tpl(T.ins_financial, {
+  first: ltr(pc(F.contribution_margin_pct[0], 1)), latest: ltr(pc(last(F.contribution_margin_pct), 1)),
+  after: ltr(pc(lastE("contribution_after_promo_margin_pct"), 0)),
+});
+plot("c-margin-promo", [
+  {x: F.months, y: F.contribution_margin_pct, type: "scatter", mode: "lines+markers", name: T.l_cm_before, line: {color: TEAL, width: 3}},
+  {x: F.months, y: E.contribution_after_promo_margin_pct, type: "scatter", mode: "lines+markers", name: T.l_cm_after, line: {color: RED, width: 3, dash: "dot"}},
+], {yaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}});
 
-const last3 = {
-  commission: D.financial.commission_revenue.slice(-3).reduce((a,b)=>a+b,0),
-  delivery: D.financial.delivery_fee_collected.slice(-3).reduce((a,b)=>a+b,0),
-  service: D.financial.service_fee_revenue.slice(-3).reduce((a,b)=>a+b,0),
+const last3 = k => F[k].slice(-3).reduce((a, b) => a + b, 0);
+plot("c-revenue-mix", [{
+  labels: [T.l_commission, T.l_delivery_fee, T.l_service_fee],
+  values: [last3("commission_revenue"), last3("delivery_fee_collected"), last3("service_fee_revenue")],
+  type: "pie", hole: .55, marker: {colors: [CAT[0], CAT[1], CAT[2]], line: {color: "#fff", width: 2}}, textinfo: "label+percent", insidetextorientation: "horizontal",
+  sort: false, hovertemplate: "%{label}: $%{value:,.0f}<extra></extra>",
+}], {showlegend: false, margin: {l: 10, r: 10, t: 10, b: 10}, hovermode: "closest"});
+
+plot("c-cost-structure", [
+  {x: F.months, y: F.rider_cost, type: "bar", name: T.l_rider_cost, marker: {color: CAT[0], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.payment_processing_cost, type: "bar", name: T.l_payment_cost, marker: {color: CAT[1], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.promotion_cost, type: "bar", name: T.l_promo_cost, marker: {color: CAT[3], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.refund_amount, type: "bar", name: T.l_refunds, marker: {color: CAT[4], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.platform_revenue, type: "scatter", mode: "lines", name: T.l_platform_revenue, line: {color: NAVY, width: 2.5}},
+], {barmode: "stack", yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.28}});
+
+plot("c-drivers", [{
+  x: D.drivers.values, y: D.drivers.labels.map(nm), type: "bar", orientation: "h",
+  marker: {color: D.drivers.values.map(v => v >= 0 ? GREEN : RED)}, hovermode: "closest",
+}], {xaxis: {title: T.l_driver_pp}, margin: {l: 200, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+/* ----------------------------------------------------------- unit economics */
+const W = D.unit_econ.waterfall;
+$("insight-unit").innerHTML = tpl(T.ins_unit, {
+  rev: ltr(money(W.revenue_per_order, 2)), cost: ltr(money(-(W.rider_cost + W.payment_cost + W.refund_cost), 2)),
+  contrib: ltr(money(W.contribution_per_order, 2)), promo: ltr(money(-W.promotion_cost, 2)), after: ltr(money(W.contribution_after_promo_per_order, 2)),
+  cover: ltr(pc(sc("delivery_fee_coverage"), 0)),
+});
+$("waterfall-cap").innerHTML = tpl(T.waterfall_cap, {window: D.unit_econ.window.split(" to ").map(ltr).join(" " + T.u_to + " "), aov: ltr(money(W.aov, 2))});
+plot("c-waterfall", [{
+  type: "waterfall", orientation: "v",
+  x: [T.wf_revenue, T.wf_rider, T.wf_payment, T.wf_refund, T.wf_contribution, T.wf_promo, T.wf_after],
+  measure: ["relative", "relative", "relative", "relative", "total", "relative", "total"],
+  y: [W.revenue_per_order, W.rider_cost, W.payment_cost, W.refund_cost, 0, W.promotion_cost, 0],
+  text: [W.revenue_per_order, W.rider_cost, W.payment_cost, W.refund_cost, W.contribution_per_order, W.promotion_cost, W.contribution_after_promo_per_order].map(v => money(v, 2)),
+  textposition: "outside", cliponaxis: false,
+  increasing: {marker: {color: CAT[2]}}, decreasing: {marker: {color: RED}}, totals: {marker: {color: NAVY}},
+  connector: {line: {color: MUTED, width: 1}},
+  hoverinfo: "x+text",
+}], {yaxis: {title: T.l_usd_order, rangemode: "tozero"}, hovermode: "closest", margin: {l: 56, r: 10, t: 24, b: 70}, xaxis: {tickangle: 0, automargin: true}});
+
+plot("c-rev-vs-cost", [
+  {x: E.months, y: E.revenue_per_order, type: "scatter", mode: "lines+markers", name: T.l_rev_order, line: {color: TEAL, width: 3}},
+  {x: E.months, y: E.cost_to_serve_per_order, type: "scatter", mode: "lines+markers", name: T.l_cost_order, line: {color: RED, width: 3}},
+  {x: E.months, y: E.rider_cost_per_order, type: "scatter", mode: "lines", name: T.l_rider_order, line: {color: CAT[0], width: 1.8, dash: "dot"}},
+  {x: E.months, y: E.promotion_cost_per_order, type: "scatter", mode: "lines", name: T.l_promo_order, line: {color: CAT[3], width: 1.8, dash: "dash"}},
+], {yaxis: {title: T.l_usd_order, rangemode: "tozero"}, legend: {orientation: "h", y: -0.28}});
+
+const UC = D.unit_econ.by_cuisine;
+const cuiIdx = UC.names.map((_, i) => i).sort((a, b) => UC.contribution_margin_pct[a] - UC.contribution_margin_pct[b]);
+plot("c-cuisine", [{
+  x: cuiIdx.map(i => UC.contribution_margin_pct[i]), y: cuiIdx.map(i => nm(UC.names[i])), type: "bar", orientation: "h",
+  marker: {color: cuiIdx.map(i => UC.contribution_margin_pct[i] >= 0 ? TEAL : RED)},
+  customdata: cuiIdx.map(i => [UC.orders[i], UC.contribution_profit_per_order[i], UC.aov[i]]),
+  hovertemplate: "%{y}<br>" + T.h_margin + ": %{x:.1f}%<br>" + T.h_orders + ": %{customdata[0]:,}<br>" + T.h_contrib_order + ": $%{customdata[1]:.2f}<extra></extra>",
+}], {xaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}, margin: {l: 130, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+function ueTable(id, U, firstHeader, extra) {
+  const hdr = [firstHeader, T.h_orders, T.h_aov, T.h_rev_order, T.h_contrib_order, T.h_margin, ...extra.map(e => e[0])];
+  const rows = U.names.map((n, i) => [nm(n), ltr(nf(U.orders[i])), ltr(money(U.aov[i], 2)), ltr(money(U.revenue_per_order[i], 2)),
+    ltr(money(U.contribution_profit_per_order[i], 2)), ltr(pc(U.contribution_margin_pct[i], 1)), ...extra.map(e => ltr(e[1](i)))]);
+  table(id, hdr, rows, [1, 2, 3, 4, 5, ...extra.map((_, j) => 6 + j)]);
+}
+ueTable("tbl-tier", D.unit_econ.by_tier, T.h_tier, [[T.h_rating, i => nf(D.unit_econ.by_tier.avg_rating[i], 2)]]);
+ueTable("tbl-payment", D.unit_econ.by_payment, T.h_payment, [[T.h_refund_rate, i => pc(D.unit_econ.by_payment.refund_rate_pct[i], 1)]]);
+
+/* --------------------------------------------------------------- customers */
+const CE = D.customers_ext, SN = CE.snapshot;
+$("insight-customers").innerHTML = tpl(T.ins_customers, {
+  channel: nm(FD.best_ltv_cac_channel.channel), ratio: ltr(nf(FD.best_ltv_cac_channel.ltv_to_cac, 2) + "x"),
+  m1: ltr(pc(D.cohorts.m1_retention_avg, 0)), m3: ltr(pc(D.cohorts.m3_retention_avg, 0)),
+  top20: ltr(pc(CE.concentration.top20_share_pct, 0)), sub_churn: ltr(pc(CE.subscription.churn_rate_pct[0], 0)), non_churn: ltr(pc(CE.subscription.churn_rate_pct[1], 0)),
+});
+miniTiles("cust-snapshot", [
+  [T.s_customers, ltr(nf(SN.customers_total)), tpl(T.s_customers_sub, {n: ltr(nf(SN.customers_ordered))})],
+  [T.s_active60, ltr(pc(SN.active_60d_pct, 1)), T.s_active60_sub],
+  [T.s_at_risk, ltr(pc(SN.at_risk_pct, 1)), T.s_at_risk_sub],
+  [T.s_churned, ltr(pc(SN.churned_pct, 1)), T.s_churned_sub],
+  [T.s_orders_cust, ltr(nf(SN.avg_orders_per_customer, 1)), T.s_orders_cust_sub],
+  [T.s_ltv, ltr(money(SN.avg_lifetime_profit, 2)), tpl(T.s_ltv_sub, {gmv: ltr(money(SN.avg_lifetime_gmv, 0))})],
+]);
+plot("c-new-returning", [
+  {x: E.months, y: E.returning_customers, type: "bar", name: T.l_returning, marker: {color: CAT[0], line: {color: "#fff", width: 1}}},
+  {x: E.months, y: E.activated_new_customers, type: "bar", name: T.l_activated_new, marker: {color: CAT[1], line: {color: "#fff", width: 1}}},
+], {barmode: "stack", yaxis: {title: T.l_active_customers}});
+plot("c-m1-ret", [{
+  x: E.months, y: E.m1_retention_pct, type: "scatter", mode: "lines+markers", name: T.l_m1, line: {color: TEAL, width: 3},
+}], {yaxis: {title: T.l_m1_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}});
+plot("c-segments", [{
+  labels: D.segments.names.map(nm), values: D.segments.customer_counts, type: "pie", hole: .5, sort: false,
+  marker: {colors: CAT.concat(["#8a8f9c"]), line: {color: "#fff", width: 2}}, textinfo: "percent", textposition: "inside", insidetextorientation: "horizontal",
+  hovertemplate: "%{label}: %{value:,} (%{percent})<extra></extra>",
+}], {showlegend: true, legend: {orientation: "v", x: 1.02, y: 0.5}, margin: {l: 10, r: 10, t: 10, b: 10}, hovermode: "closest"});
+const SP = CE.segment_profile;
+const custShare = SP.customers.map(c => c / SP.customers.reduce((a, b) => a + b, 0) * 100);
+plot("c-segment-profit", [
+  {x: SP.names.map(nm), y: custShare, type: "bar", name: T.l_customer_share, marker: {color: MUTED}},
+  {x: SP.names.map(nm), y: SP.profit_share_pct, type: "bar", name: T.l_profit_share, marker: {color: TEAL}},
+], {barmode: "group", yaxis: {title: T.l_share_pct, ticksuffix: T.meta_pct}, xaxis: {tickangle: -30, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 80}, legend: {orientation: "h", y: -0.4}});
+
+const SB = CE.subscription;
+table("tbl-subscription", [T.h_metric, nm("Subscribed"), nm("Not Subscribed")], [
+  [T.h_customers, ltr(nf(SB.customers[0])), ltr(nf(SB.customers[1]))],
+  [T.h_orders_per_customer, ltr(nf(SB.orders_per_customer[0], 1)), ltr(nf(SB.orders_per_customer[1], 1))],
+  [T.h_orders_per_month, ltr(nf(SB.orders_per_month[0], 2)), ltr(nf(SB.orders_per_month[1], 2))],
+  [T.h_aov, ltr(money(SB.aov[0], 2)), ltr(money(SB.aov[1], 2))],
+  [T.h_contrib_order, ltr(money(SB.contribution_per_order[0], 2)), ltr(money(SB.contribution_per_order[1], 2))],
+  [T.h_ltv, ltr(money(SB.lifetime_profit_per_customer[0], 2)), ltr(money(SB.lifetime_profit_per_customer[1], 2))],
+  [T.h_discount_dep, ltr(pc(SB.discount_dependency_pct[0], 1)), ltr(pc(SB.discount_dependency_pct[1], 1))],
+  [T.h_churn, ltr(pc(SB.churn_rate_pct[0], 1)), ltr(pc(SB.churn_rate_pct[1], 1))],
+], [1, 2]);
+const CC = CE.concentration;
+plot("c-concentration", [
+  {x: CC.x_pct_customers, y: CC.x_pct_customers, type: "scatter", mode: "lines", name: T.l_equality, line: {color: MUTED, width: 1.5, dash: "dash"}},
+  {x: CC.x_pct_customers, y: CC.y_pct_gmv, type: "scatter", mode: "lines+markers", name: T.l_cum_gmv, line: {color: TEAL, width: 3}, fill: "tonexty", fillcolor: "rgba(15,124,130,0.10)"},
+], {xaxis: {title: T.l_top_customers, ticksuffix: T.meta_pct}, yaxis: {title: T.l_cum_gmv_axis, ticksuffix: T.meta_pct, range: [0, 100]},
+    annotations: [{x: 20, y: CC.top20_share_pct, text: tpl(T.l_top20_note, {v: nf(CC.top20_share_pct, 0)}), showarrow: true, ax: 60, ay: 30, font: {size: 11}}]});
+
+plot("c-cohort", [{
+  z: D.cohorts.matrix, x: D.cohorts.month_numbers.map(m => T.l_month_short + " " + m), y: D.cohorts.cohort_labels.map(monthLabel),
+  type: "heatmap", colorscale: [[0, "#eef6f6"], [1, "#0f7c82"]], zmin: 0, hoverongaps: false, colorbar: {title: T.meta_pct},
+  hovertemplate: "%{y} · %{x}: %{z:.1f}%<extra></extra>",
+}], {yaxis: {type: "category", dtick: 2}, margin: {l: 90, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+/* -------------------------------------------------------------- restaurants */
+const QC = {
+  "Star: High Revenue / High Margin": GREEN, "Volume Trap: High Revenue / Low Margin": CAT[3],
+  "Niche Profit: Low Revenue / High Margin": TEAL, "Review: Low Revenue / Low Margin": RED,
 };
-Plotly.newPlot("chart-revenue-mix", [{
-  labels:["Commission Revenue","Delivery Fee Revenue","Service Fee Revenue"],
-  values:[last3.commission,last3.delivery,last3.service],
-  type:"pie", hole:.55, marker:{colors:[NAVY,TEAL,AMBER]}, textinfo:"label+percent"
-}], {...layoutBase, showlegend:false}, cfg);
-
-Plotly.newPlot("chart-cost-structure", [
-  {x:D.financial.months, y:D.financial.rider_cost, type:"bar", name:"Rider Cost", marker:{color:NAVY}},
-  {x:D.financial.months, y:D.financial.payment_processing_cost, type:"bar", name:"Payment Processing", marker:{color:AMBER}},
-  {x:D.financial.months, y:D.financial.promotion_cost, type:"bar", name:"Promotion/Discount", marker:{color:TEAL}},
-  {x:D.financial.months, y:D.financial.refund_amount, type:"bar", name:"Refunds", marker:{color:RED}},
-], {...layoutBase, barmode:"stack", yaxis:{title:"$ per month"}}, cfg);
-
-Plotly.newPlot("chart-drivers", [{
-  x:D.drivers.values, y:D.drivers.labels, type:"bar", orientation:"h",
-  marker:{color:D.drivers.values.map(v=>v>=0?GREEN:RED)}
-}], {...layoutBase, xaxis:{title:"Approx. margin impact (pp)"}, margin:{l:230,r:20,t:10,b:40}}, cfg);
-
-// ---------- Customers ----------
-document.getElementById("insight-customers").innerHTML =
-  `<b>Read:</b> ${D.findings.best_ltv_cac_channel.channel} delivers the strongest LTV:CAC (${D.findings.best_ltv_cac_channel.ltv_to_cac}x) — a candidate for incremental acquisition spend. Average month-1 cohort retention runs ~${D.cohorts.m1_retention_avg}%, settling near ~${D.cohorts.m3_retention_avg}% by month 3.`;
-
-Plotly.newPlot("chart-segments", [{
-  labels:D.segments.names, values:D.segments.customer_counts, type:"pie", hole:.5,
-  marker:{colors:PALETTE}, textinfo:"label+value"
-}], {...layoutBase, showlegend:false}, cfg);
-
-Plotly.newPlot("chart-ltv-cac", [{
-  x:D.channels.names, y:D.channels.ltv_to_cac, type:"bar",
-  marker:{color:D.channels.ltv_to_cac.map(v=>v>=3?GREEN:(v>=1.5?AMBER:RED))},
-  text:D.channels.ltv_to_cac.map(v=>v.toFixed(2)+"x"), textposition:"outside"
-}], {...layoutBase, yaxis:{title:"LTV : CAC"}}, cfg);
-
-Plotly.newPlot("chart-cohort", [{
-  z:D.cohorts.matrix, x:D.cohorts.month_numbers.map(m=>"M"+m), y:D.cohorts.cohort_labels,
-  type:"heatmap", colorscale:[[0,"#fbe9e9"],[0.5,"#fff3d6"],[1,"#e3f6ea"]], hoverongaps:false,
-  colorbar:{title:"%"}
-}], {...layoutBase, margin:{l:80,r:20,t:10,b:40}}, cfg);
-
-// ---------- Restaurants ----------
-const quadColor = {
-  "Star: High Revenue / High Margin": GREEN,
-  "Volume Trap: High Revenue / Low Margin": AMBER,
-  "Niche Profit: Low Revenue / High Margin": TEAL,
-  "Review: Low Revenue / Low Margin": RED,
-};
-document.getElementById("insight-restaurants").innerHTML =
-  `<b>Read:</b> <b>Stars</b> (high revenue, high margin) should get marketing priority; <b>Volume Traps</b> drive GMV but erode margin and are candidates for commission or delivery-cost renegotiation; <b>Niche Profit</b> restaurants are small but efficient; <b>Review</b> restaurants underperform on both axes.`;
-
+const qShort = q => { const k = q.split(":")[0]; return (T.quad && T.quad[k]) || k; };
+const RX = D.restaurants_ext;
+$("insight-restaurants").innerHTML = T.ins_restaurants;
+miniTiles("rest-tiles", [
+  [T.r_with_orders, ltr(nf(RX.restaurants_with_orders)), T.r_with_orders_sub],
+  [T.r_top10, ltr(pc(RX.top10_share_pct, 1)), T.r_top10_sub],
+  [T.r_top20, ltr(pc(RX.top20pct_share_pct, 1)), T.r_top20_sub],
+  [T.r_rating, ltr(nf(RX.avg_rating, 2)), T.r_rating_sub],
+]);
 const rq = D.restaurants.scatter;
-const quadTraces = [...new Set(rq.quadrant)].map(q => ({
-  x: rq.gmv.filter((_,i)=>rq.quadrant[i]===q),
-  y: rq.margin_pct.filter((_,i)=>rq.quadrant[i]===q),
-  text: rq.name.filter((_,i)=>rq.quadrant[i]===q),
-  mode:"markers", type:"scatter", name:q.split(":")[0], marker:{color:quadColor[q]||MUTED, size:7, opacity:.75}
-}));
-Plotly.newPlot("chart-quadrant", quadTraces, {...layoutBase, xaxis:{title:"Monthly GMV ($)"}, yaxis:{title:"Margin %"}}, cfg);
+plot("c-quadrant", [...new Set(rq.quadrant)].map(q => ({
+  x: rq.gmv.filter((_, i) => rq.quadrant[i] === q), y: rq.margin_pct.filter((_, i) => rq.quadrant[i] === q),
+  text: rq.name.filter((_, i) => rq.quadrant[i] === q), mode: "markers", type: "scatter", name: qShort(q),
+  marker: {color: QC[q] || MUTED, size: 8, opacity: .8, line: {color: "#fff", width: 1}},
+  hovertemplate: "%{text}<br>GMV $%{x:,.0f} · %{y:.1f}%<extra></extra>",
+})), {xaxis: {title: T.l_gmv_month}, yaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}, hovermode: "closest"});
+plot("c-quadrant-bar", [{
+  x: D.restaurants.quadrant_counts, y: D.restaurants.quadrant_labels.map(qShort), type: "bar", orientation: "h",
+  marker: {color: D.restaurants.quadrant_labels.map(q => QC[q] || MUTED)}, hovermode: "closest",
+}], {margin: {l: 120, r: 20, t: 10, b: 44}, hovermode: "closest", yaxis: {autorange: "reversed"}});
+stacked2("c-supply",
+  [{x: E.months, y: E.active_restaurants, type: "scatter", mode: "lines+markers", line: {color: NAVY, width: 3}, name: T.l_active_rest}],
+  [{x: E.months, y: E.orders_per_restaurant, type: "scatter", mode: "lines+markers", line: {color: TEAL, width: 3}, name: T.l_orders_rest}],
+  [T.l_active_rest, T.l_orders_rest]);
 
-Plotly.newPlot("chart-quadrant-bar", [{
-  x:D.restaurants.quadrant_counts, y:D.restaurants.quadrant_labels.map(q=>q.split(":")[0]), type:"bar", orientation:"h",
-  marker:{color:D.restaurants.quadrant_labels.map(q=>quadColor[q]||MUTED)}
-}], {...layoutBase, margin:{l:110,r:20,t:10,b:40}}, cfg);
+/* -------------------------------------------------------------- operations */
+const O = D.ops, H = O.heatmap, CS = O.city_scorecard;
+$("insight-operations").innerHTML = tpl(T.ins_operations, {
+  peak: O.peak_hours.slice().sort((a, b) => a - b).map(h => ltr(String(h).padStart(2, "0") + ":00")).join("، ".replace("،", FA ? "،" : ",")),
+  peak_share: ltr(pc(O.peak_3h_share_pct, 0)), ontime: ltr(pc(sc("on_time_rate"), 0)),
+  worst_city: nm(CS.names[CS.on_time_pct.indexOf(Math.min(...CS.on_time_pct))]), worst_ontime: ltr(pc(Math.min(...CS.on_time_pct), 0)),
+});
+miniTiles("ops-tiles", [
+  [T.o_peak, ltr(pc(O.peak_3h_share_pct, 0)), tpl(T.o_peak_sub, {h: O.peak_hours.slice().sort((a, b) => a - b).map(h => String(h).padStart(2, "0") + ":00").join(" · ")})],
+  [T.o_weekend, ltr(pc(O.weekend_share_pct, 1)), T.o_weekend_sub],
+  [T.o_holiday, ltr((O.holiday_lift_pct >= 0 ? "+" : "−") + nf(Math.abs(O.holiday_lift_pct), 1) + T.meta_pct), T.o_holiday_sub],
+  [T.o_eta, ltr(nf(O.avg_eta_error_minutes, 1) + " " + T.u_min), T.o_eta_sub],
+  [T.o_distance, ltr(nf(O.avg_distance_km, 2) + " " + T.u_km), T.o_distance_sub],
+]);
+plot("c-ontime", [{x: E.months, y: E.on_time_rate_pct, type: "scatter", mode: "lines+markers", line: {color: GREEN, width: 3}, name: T.c_ontime},
+                  {x: E.months, y: E.very_late_rate_pct, type: "scatter", mode: "lines+markers", line: {color: RED, width: 2, dash: "dot"}, name: T.l_very_late}],
+     {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, range: [0, 100]}, legend: {orientation: "h", y: -0.25}});
+plot("c-cancel", [{x: E.months, y: E.cancellation_rate_pct, type: "scatter", mode: "lines+markers", line: {color: RED, width: 3}, name: T.c_cancel},
+                  {x: E.months, y: E.refund_rate_pct, type: "scatter", mode: "lines+markers", line: {color: CAT[3], width: 2.5}, name: T.l_refund_rate}],
+     {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}, legend: {orientation: "h", y: -0.25}});
+plot("c-heatmap", [{
+  z: H.z, x: H.hours.map(h => String(h).padStart(2, "0")), y: H.days.map(d => T.days[d]), type: "heatmap",
+  colorscale: [[0, "#f1f8f8"], [1, "#0f7c82"]], zmin: 0, colorbar: {title: T.l_orders_day},
+  hovertemplate: "%{y} %{x}:00 — %{z:.1f} " + T.l_orders_day + "<extra></extra>",
+}], {xaxis: {title: T.l_hour, type: "category"}, yaxis: {autorange: "reversed"}, hovermode: "closest", margin: {l: 70, r: 10, t: 10, b: 50}});
+const CR = O.cancel_reasons;
+plot("c-cancel-reasons", [{
+  x: CR.per_100_orders, y: CR.names.map(nm), type: "bar", orientation: "h", marker: {color: CAT[1]},
+  text: CR.share_pct.map(v => nf(v, 0) + T.meta_pct), textposition: "outside", cliponaxis: false,
+  hovertemplate: "%{y}: %{x:.2f} / 100<extra></extra>",
+}], {xaxis: {title: T.l_per100, rangemode: "tozero"}, margin: {l: 150, r: 40, t: 10, b: 50}, hovermode: "closest", yaxis: {autorange: "reversed"}});
 
-// ---------- Operations ----------
-Plotly.newPlot("chart-ontime", [{
-  x:D.financial.months, y:D.financial.on_time_rate, type:"scatter", mode:"lines+markers", line:{color:GREEN,width:3}
-}], {...layoutBase, yaxis:{title:"%", range:[0,100]}}, cfg);
+(function () {
+  const cols = [
+    shadedCol(CS.on_time_pct, true, v => pc(v, 1)), shadedCol(CS.avg_delivery_minutes, false, v => nf(v, 1)),
+    shadedCol(CS.cancellation_rate_pct, false, v => pc(v, 1)), shadedCol(CS.rider_cost_per_order, false, v => money(v, 2)),
+    shadedCol(CS.contribution_per_order, true, v => money(v, 2)), shadedCol(CS.contribution_margin_pct, true, v => pc(v, 1)),
+  ];
+  const head = [T.h_city, T.h_orders, T.h_share, T.h_aov, T.h_ontime, T.h_deliv_min, T.h_cancel, T.h_rider_order, T.h_contrib_order, T.h_margin]
+    .map((h, i) => `<th class="${i ? "n" : ""}">${h}</th>`).join("");
+  const body = CS.names.map((n, i) => `<tr><td>${nm(n)}</td><td class="n">${ltr(nf(CS.orders[i]))}</td><td class="n">${ltr(pc(CS.share_pct[i], 1))}</td><td class="n">${ltr(money(CS.aov[i], 2))}</td>` +
+    cols.map(c => `<td class="n" ${c[i].attr}>${c[i].html}</td>`).join("") + "</tr>").join("");
+  $("tbl-city").innerHTML = `<table class="simple"><tr>${head}</tr>${body}</table>`;
+})();
 
-Plotly.newPlot("chart-cancel", [{
-  x:D.financial.months, y:D.financial.cancellation_rate, type:"scatter", mode:"lines+markers", line:{color:RED,width:3}
-}], {...layoutBase, yaxis:{title:"%"}}, cfg);
+stacked2("c-rider",
+  [{x: E.months, y: E.rider_utilization_pct, type: "scatter", mode: "lines+markers", line: {color: NAVY, width: 3}, name: T.l_utilization}],
+  [{x: E.months, y: E.orders_per_rider_hour, type: "scatter", mode: "lines+markers", line: {color: TEAL, width: 3}, name: T.l_orders_hour}],
+  [T.l_utilization, T.l_orders_hour], {y1: {ticksuffix: T.meta_pct, rangemode: "tozero"}, y2: {rangemode: "tozero"}});
+const V = O.vehicle;
+table("tbl-vehicle", [T.h_vehicle, T.h_orders, T.h_share, T.h_rider_order, T.h_cost_km, T.h_deliv_min, T.h_ontime, T.h_util],
+  V.names.map((n, i) => [nm(n), ltr(nf(V.orders[i])), ltr(pc(V.share_pct[i], 1)), ltr(money(V.rider_cost_per_order[i], 2)), ltr(money(V.rider_cost_per_km[i], 2)),
+    ltr(nf(V.avg_delivery_minutes[i], 1)), ltr(pc(V.on_time_pct[i], 1)), ltr(pc(V.utilization_pct[i], 1))]), [1, 2, 3, 4, 5, 6, 7]);
+const DR = O.delay_rating;
+plot("c-delay-rating", [{
+  x: DR.buckets.map(nm), y: DR.avg_rating, type: "scatter", mode: "lines+markers+text", line: {color: NAVY, width: 3}, marker: {size: 9, color: [GREEN, TEAL, CAT[3], CAT[1], RED], line: {color: "#fff", width: 2}},
+  text: DR.avg_rating.map(v => nf(v, 2)), textposition: "top center", cliponaxis: false,
+  hovertemplate: "%{x}: %{y:.2f}<extra></extra>",
+}], {yaxis: {title: T.l_avg_rating, range: [4.0, 4.55]}, margin: {l: 56, r: 20, t: 20, b: 70}, xaxis: {tickangle: 0, automargin: true}, hovermode: "closest"});
 
-// ---------- Forecast ----------
-const fo = D.forecast.metrics.delivered_orders;
-const hist = D.forecast.history_orders;
-document.getElementById("insight-forecast").innerHTML =
-  `<b>Read:</b> The <b>${D.forecast.model_selection.delivered_orders.replace("_"," ")}</b> model was selected for orders (lowest rolling-origin WAPE). Base-case orders reach ~${fmtNum(Math.round(fo.point_forecast.at(-1)))} by the end of the forecast horizon.`;
+/* --------------------------------------------------------------- marketing */
+const M = D.marketing;
+$("insight-marketing").innerHTML = tpl(T.ins_marketing, {
+  paid: ltr(pc(M.paid_share_of_spend_pct, 0)), best: nm(M.channels.slice().sort((a, b) => M.ltv_to_cac_observed[b] - M.ltv_to_cac_observed[a])[0]),
+  best_ratio: ltr(nf(Math.max(...M.channels.map(c => M.ltv_to_cac_observed[c])), 1) + "x"),
+  ps: ltr(nf(M.ltv_to_cac_observed["Paid Social"], 2) + "x"), psr: ltr(nf(M.ltv_to_cac_observed["Paid Search"], 2) + "x"),
+  cac_up: ltr(nf((M.cac_observed_latest_3m["Paid Search"] / M.cac_assumed["Paid Search"] - 1) * 100, 0) + T.meta_pct),
+});
+miniTiles("mkt-tiles", [
+  [T.m_total_spend, ltr(money(M.total_spend_period, 0)), T.m_total_spend_sub],
+  [T.m_signups, ltr(nf(M.total_signups_period)), T.m_signups_sub],
+  [T.m_paid_share, ltr(pc(M.paid_share_of_spend_pct, 1)), T.m_paid_share_sub],
+  [T.m_promo_share, ltr(pc(M.promo.order_share_pct[0], 1)), tpl(T.m_promo_share_sub, {d: ltr(pc(M.promo.avg_discount_pct_of_food, 0))})],
+]);
+plot("c-spend-channel", M.channels.map((c, i) => ({
+  x: M.months, y: M.spend_by_channel[c], type: "bar", name: nm(c), marker: {color: CAT[i], line: {color: "#fff", width: 1}},
+})), {barmode: "stack", yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.28}});
+plot("c-cac-trend", [
+  {x: E.months, y: E.blended_cac, type: "scatter", mode: "lines+markers", name: T.l_blended_cac, line: {color: NAVY, width: 3}},
+], {yaxis: {title: T.l_usd_signup, rangemode: "tozero"}});
+plot("c-cac-compare", [
+  {x: M.channels.map(nm), y: M.channels.map(c => M.cac_assumed[c]), type: "bar", name: T.l_cac_assumed, marker: {color: MUTED}},
+  {x: M.channels.map(nm), y: M.channels.map(c => M.cac_observed_latest_3m[c]), type: "bar", name: T.l_cac_observed, marker: {color: CAT[1]}},
+], {barmode: "group", yaxis: {title: T.l_usd_signup}, xaxis: {tickangle: -20, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 80}, legend: {orientation: "h", y: -0.38}});
+const lc = M.channels.slice().sort((a, b) => M.ltv_to_cac_observed[b] - M.ltv_to_cac_observed[a]);
+plot("c-ltvcac", [{
+  x: lc.map(nm), y: lc.map(c => M.ltv_to_cac_observed[c]), type: "bar",
+  marker: {color: lc.map(c => M.ltv_to_cac_observed[c] >= 3 ? GREEN : M.ltv_to_cac_observed[c] >= 1 ? CAT[3] : RED)},
+  text: lc.map(c => nf(M.ltv_to_cac_observed[c], 2) + "x"), textposition: "outside", cliponaxis: false, hovermode: "closest",
+}], {yaxis: {title: "LTV : CAC", rangemode: "tozero"}, xaxis: {tickangle: -15, automargin: true}, shapes: [{type: "line", xref: "paper", x0: 0, x1: 1, y0: 1, y1: 1, line: {color: MUTED, width: 1.5, dash: "dash"}}], hovermode: "closest", margin: {l: 56, r: 20, t: 20, b: 70}});
+plot("c-discount", [
+  {x: E.months, y: E.promo_order_share_pct, type: "scatter", mode: "lines+markers", name: T.l_promo_orders, line: {color: CAT[3], width: 3}},
+  {x: E.months, y: E.promotion_cost_pct_revenue, type: "scatter", mode: "lines+markers", name: T.l_promo_rev, line: {color: RED, width: 3}},
+  {x: E.months, y: E.discount_rate_pct, type: "scatter", mode: "lines+markers", name: T.l_discount_gmv, line: {color: NAVY, width: 3}},
+], {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}, legend: {orientation: "h", y: -0.3}});
+const PR = M.promo;
+table("tbl-promo", [T.h_metric, T.h_with_promo, T.h_no_promo], [
+  [T.h_order_share, ltr(pc(PR.order_share_pct[0], 1)), ltr(pc(PR.order_share_pct[1], 1))],
+  [T.h_aov, ltr(money(PR.aov[0], 2)), ltr(money(PR.aov[1], 2))],
+  [T.h_rev_order, ltr(money(PR.revenue_per_order[0], 2)), ltr(money(PR.revenue_per_order[1], 2))],
+  [T.h_contrib_order, ltr(money(PR.contribution_per_order[0], 2)), ltr(money(PR.contribution_per_order[1], 2))],
+  [T.h_promo_order, ltr(money(PR.promotion_cost_per_order[0], 2)), ltr(money(PR.promotion_cost_per_order[1], 2))],
+  [`<b>${T.h_after_promo}</b>`, `<b>${ltr(money(PR.contribution_after_promo_per_order[0], 2))}</b>`, `<b>${ltr(money(PR.contribution_after_promo_per_order[1], 2))}</b>`],
+], [1, 2]);
 
-Plotly.newPlot("chart-forecast", [
-  {x:hist.months, y:hist.values, type:"scatter", mode:"lines", name:"Actuals", line:{color:NAVY,width:3}},
-  {x:fo.months, y:fo.upper_80, type:"scatter", mode:"lines", name:"80% Upper", line:{width:0}, showlegend:false},
-  {x:fo.months, y:fo.lower_80, type:"scatter", mode:"lines", name:"80% Interval", fill:"tonexty", fillcolor:"rgba(15,124,130,0.15)", line:{width:0}},
-  {x:fo.months, y:fo.point_forecast, type:"scatter", mode:"lines+markers", name:"Forecast (Base)", line:{color:TEAL,width:3,dash:"dot"}},
-], {...layoutBase, yaxis:{title:"Delivered Orders"}}, cfg);
-
-const modelRows = Object.entries(D.forecast.validation).map(([metric,rows])=>{
-  const best = rows[0];
-  return `<tr><td>${metric.replace(/_/g," ")}</td><td>${best.model.replace("_"," ")}</td><td>${(best.wape*100).toFixed(1)}%</td><td>${(best.mape*100).toFixed(1)}%</td></tr>`;
-}).join("");
-document.getElementById("table-models").innerHTML = `<table class="simple"><tr><th>Metric</th><th>Selected Model</th><th>WAPE</th><th>MAPE</th></tr>${modelRows}</table>`;
-
-const p = D.plan;
-document.getElementById("plan-box").innerHTML = `
-  <p><b>Verdict:</b> ${p.verdict}</p>
+/* ---------------------------------------------------------------- forecast */
+const fo = D.forecast.metrics.delivered_orders, hist = D.forecast.history_orders;
+$("insight-forecast").innerHTML = tpl(T.ins_forecast, {
+  model: nm(D.forecast.model_selection.delivered_orders), end: ltr(nf(Math.round(last(fo.point_forecast)))),
+});
+plot("c-forecast", [
+  {x: hist.months, y: hist.values, type: "scatter", mode: "lines", name: T.l_actuals, line: {color: NAVY, width: 3}},
+  {x: fo.months, y: fo.upper_80, type: "scatter", mode: "lines", name: T.l_upper80, line: {width: 0}, showlegend: false, hoverinfo: "skip"},
+  {x: fo.months, y: fo.lower_80, type: "scatter", mode: "lines", name: T.l_interval80, fill: "tonexty", fillcolor: "rgba(15,124,130,0.15)", line: {width: 0}},
+  {x: fo.months, y: fo.point_forecast, type: "scatter", mode: "lines+markers", name: T.l_forecast_base, line: {color: TEAL, width: 3, dash: "dot"}},
+], {yaxis: {title: T.l_orders}});
+table("table-models", [T.h_metric, T.h_selected_model, "WAPE", "MAPE"],
+  Object.entries(D.forecast.validation).map(([metric, rows]) => [nm(metric), nm(rows[0].model), ltr(pc(rows[0].wape * 100, 1)), ltr(pc(rows[0].mape * 100, 1))]), [2, 3]);
+const P = D.plan;
+const verdict = (T.verdicts && T.verdicts[P.verdict]) || P.verdict;
+$("plan-box").innerHTML = `<p><b>${T.l_verdict}:</b> ${verdict}</p>
   <table class="simple">
-    <tr><td>Current annualized orders</td><td>${fmtNum(Math.round(p.current_orders_annualized))}</td></tr>
-    <tr><td>Target annualized orders (+25%)</td><td>${fmtNum(Math.round(p.required_orders_annualized))}</td></tr>
-    <tr><td>Current contribution margin</td><td>${p.current_margin_pct}%</td></tr>
-    <tr><td>Target contribution margin (+2pp)</td><td>${p.required_margin_pct}%</td></tr>
+    <tr><td>${T.p_cur_orders}</td><td class="n">${ltr(nf(Math.round(P.current_orders_annualized)))}</td></tr>
+    <tr><td>${T.p_tgt_orders}</td><td class="n">${ltr(nf(Math.round(P.required_orders_annualized)))}</td></tr>
+    <tr><td>${T.p_cur_margin}</td><td class="n">${ltr(pc(P.current_margin_pct, 2))}</td></tr>
+    <tr><td>${T.p_tgt_margin}</td><td class="n">${ltr(pc(P.required_margin_pct, 2))}</td></tr>
+    <tr><td>${T.p_promo_burden}</td><td class="n">${ltr(pc(lastE("promotion_cost_pct_revenue"), 0))}</td></tr>
   </table>`;
 
-// ---------- Optimization ----------
+/* ------------------------------------------------------------ optimization */
 const scnP = D.forecast.metrics.contribution_profit;
-Plotly.newPlot("chart-scenario", [
-  {x:scnP.months, y:scnP.downside_case, type:"scatter", mode:"lines", name:"Downside", line:{color:RED,dash:"dot"}},
-  {x:scnP.months, y:scnP.base_case, type:"scatter", mode:"lines", name:"Base", line:{color:NAVY,width:3}},
-  {x:scnP.months, y:scnP.upside_case, type:"scatter", mode:"lines", name:"Upside", line:{color:GREEN,dash:"dot"}},
-], {...layoutBase, yaxis:{title:"Contribution Profit ($)"}}, cfg);
-
+plot("c-scenario", [
+  {x: scnP.months, y: scnP.downside_case, type: "scatter", mode: "lines", name: T.l_downside, line: {color: RED, dash: "dot", width: 2.5}},
+  {x: scnP.months, y: scnP.base_case, type: "scatter", mode: "lines", name: T.l_base, line: {color: NAVY, width: 3}},
+  {x: scnP.months, y: scnP.upside_case, type: "scatter", mode: "lines", name: T.l_upside, line: {color: GREEN, dash: "dot", width: 2.5}},
+], {yaxis: {title: T.l_profit_usd}});
 const oc = D.optimization.cells;
-Plotly.newPlot("chart-optimization", [
-  {x:oc.labels, y:oc.baseline_spend, type:"bar", name:"Baseline (even split)", marker:{color:MUTED}},
-  {x:oc.labels, y:oc.optimized_spend, type:"bar", name:"Optimized", marker:{color:TEAL}},
-], {...layoutBase, barmode:"group", xaxis:{tickangle:-35}, margin:{l:50,r:20,t:10,b:120}}, cfg);
-
+const ocLabels = oc.labels.map(l => l.split(" / ").map(nm).join(" / "));
+plot("c-optimization", [
+  {x: ocLabels, y: oc.baseline_spend, type: "bar", name: T.l_baseline_spend, marker: {color: MUTED}},
+  {x: ocLabels, y: oc.optimized_spend, type: "bar", name: T.l_optimized_spend, marker: {color: TEAL}},
+], {barmode: "group", xaxis: {tickangle: -40, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 130}, yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.55}});
 const os_ = D.optimization.summary;
-document.getElementById("opt-summary").innerHTML =
-  `<b>Read:</b> Re-allocating the same monthly promotion budget (~${fmtMoney(os_.total_budget)}) toward higher-response city × segment cells lifts incremental contribution profit by <b>${os_.gain_pct.toFixed(0)}%</b> versus an even split — from ${fmtMoney(os_.baseline_incremental_profit)} to ${fmtMoney(os_.optimized_incremental_profit)}.`;
+$("opt-summary").innerHTML = tpl(T.ins_optimization, {
+  budget: fmtBudget(os_.total_budget), gain: ltr(nf(os_.gain_pct, 0) + T.meta_pct),
+  from: ltr(money(os_.baseline_incremental_profit, 0)), to: ltr(money(os_.optimized_incremental_profit, 0)),
+});
+function fmtBudget(v) { return ltr(money(v, 0)); }
 
-document.getElementById("generated-at").innerText = "Data generated " + D.generated_at + " · synthetic dataset, seeded and reproducible.";
+$("generated-at").innerHTML = tpl(T.generated_at, {d: ltr(D.generated_at)});
 
-// scroll-spy nav
+/* scroll-spy nav */
 const sections = [...document.querySelectorAll("section")];
 const links = [...document.querySelectorAll("nav a")];
-window.addEventListener("scroll", ()=>{
-  let idx = 0;
-  const y = window.scrollY + 90;
-  sections.forEach((s,i)=>{ if(s.offsetTop <= y) idx = i; });
-  links.forEach(l=>l.classList.remove("active"));
-  if(links[idx]) links[idx].classList.add("active");
+window.addEventListener("scroll", () => {
+  let idx = 0; const y = window.scrollY + 90;
+  sections.forEach((s, i) => { if (s.offsetTop <= y) idx = i; });
+  links.forEach(l => l.classList.remove("active"));
+  if (links[idx]) links[idx].classList.add("active");
 });
 </script>
 </body>

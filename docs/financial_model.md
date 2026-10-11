@@ -37,8 +37,30 @@ channel (`src/finance/finance.py::unit_economics_by`):
 - **Variable cost per order** = (rider + payment processing + promotion + refund) / orders
 - **Contribution profit per order** = contribution profit / orders
 - **LTV** = average customer lifetime contribution profit, by channel
-- **CAC** = an assumed, documented cost per channel (see `docs/assumptions.md`)
+- **CAC** = an assumed, documented cost per channel (see `docs/assumptions.md`);
+  v2 also reports an *observed* CAC from the generated marketing-spend table
 - **LTV : CAC** and **payback (in orders)** follow directly
+
+### Two contribution views (v2)
+
+The model's headline **contribution profit** is *before* promotions:
+`platform revenue − rider − payment processing − 50 % of refunds`.
+Promotions are a platform-funded incentive (`promotion_cost = discount_amount`),
+so v2 adds **contribution after promotions** = contribution profit −
+promotion cost. On the latest three months the per-order waterfall is:
+
+| Line | $ / order |
+|---|---|
+| Platform revenue | 4.23 |
+| Rider cost | −3.39 |
+| Payment processing | −0.39 |
+| Refunds (50 %) | −0.18 |
+| **Contribution (headline)** | **0.28** |
+| Promotions | −1.07 |
+| **Contribution after promotions** | **−0.79** |
+
+The dashboard shows both; the headline definition is unchanged so every v1
+number still reconciles.
 
 ## Margin driver decomposition
 

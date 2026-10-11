@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شرکت ۱ — داشبورد هوش تجاری</title>
+<meta name="description" content="داشبورد هوش تجاری شرکت ۱: مطالعه موردی بازار آنلاین سفارش غذا با داده‌های شبیه‌سازی‌شده؛ ۳۴ شاخص کلیدی مدیریتی، اقتصاد واحد، مشتریان، عملیات، کارایی بازاریابی، پیش‌بینی و بهینه‌سازی.">
+<link rel="alternate" hreflang="en" href="https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/">
+<link rel="alternate" hreflang="fa" href="https://milad-shabani.github.io/Delivery-marketplace-analytics-engine/fa/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Regular.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-ExtraBold.woff2">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2/plotly.min.js"></script>
+<style>
+  /* Vazirmatn FD: Latin digits in text and charts are drawn as Persian digits */
+  @font-face{font-family:"VazirFD";font-weight:400;font-style:normal;font-display:swap;src:url("https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Regular.woff2") format("woff2");}
+  @font-face{font-family:"VazirFD";font-weight:500;font-style:normal;font-display:swap;src:url("https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Medium.woff2") format("woff2");}
+  @font-face{font-family:"VazirFD";font-weight:600;font-style:normal;font-display:swap;src:url("https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-SemiBold.woff2") format("woff2");}
+  @font-face{font-family:"VazirFD";font-weight:700;font-style:normal;font-display:swap;src:url("https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Bold.woff2") format("woff2");}
+  @font-face{font-family:"VazirFD";font-weight:800;font-style:normal;font-display:swap;src:url("https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-ExtraBold.woff2") format("woff2");}
+
+  :root{
+    --bg:#f2f4f8; --surface:#ffffff; --ink:#131a2b; --ink-2:#2b3550; --muted:#5b6478; --line:#e3e7ee; --line-2:#eef1f5;
+    --deep:#0e1b3d; --deep-2:#16295a;
+    --teal:#0f7c82; --teal-l:#e3f3f3; --navy:#1f2a44;
+    --green:#1a7a50; --green-l:#e4f4ec; --red:#b83c3c; --red-l:#fbeaea; --amber:#b86a12; --amber-l:#fdf1de;
+    --paper:#fffbf1; --paper-ink:#2a2418;
+    --font:'VazirFD', 'Vazirmatn', Tahoma, 'Segoe UI', Arial, sans-serif; --display:'VazirFD', 'Vazirmatn', Tahoma, 'Segoe UI', Arial, sans-serif;
+    --radius:14px; --tilt:-1.4deg; --ring-x:84%; --track:-.02em; --lh:1.65;
+  }
+  html[dir=rtl]{--tilt:1.4deg; --ring-x:16%; --track:0; --lh:1.9}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:64px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:var(--lh);-webkit-font-smoothing:antialiased}
+  a{color:var(--teal)}
+  :focus-visible{outline:3px solid #7cc4c8;outline-offset:2px;border-radius:6px}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+  .num{direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+  /* ---------- hero: the average order, printed as a receipt ---------- */
+  header.hero{position:relative;overflow:hidden;color:#fff;padding:20px 0 76px;background-color:var(--deep);
+    background-image:repeating-radial-gradient(circle at var(--ring-x) 46%, transparent 0 54px, rgba(255,255,255,.05) 54px 55px),
+                     linear-gradient(160deg,var(--deep) 0%,var(--deep-2) 100%)}
+  .topbar{display:flex;justify-content:flex-end;margin-bottom:34px}
+  .langswitch{display:inline-flex;border:1px solid rgba(255,255,255,.35);border-radius:999px;overflow:hidden;font-size:13px;font-weight:600;background:rgba(255,255,255,.06)}
+  .langswitch a,.langswitch span{padding:6px 18px;text-decoration:none;color:#fff;opacity:.85}
+  .langswitch span{background:#fff;color:var(--deep);opacity:1}
+  .langswitch a:hover{background:rgba(255,255,255,.14);opacity:1}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,390px);gap:64px;align-items:center}
+  header.hero h1{margin:0 0 18px;font-family:var(--display);font-size:clamp(30px,4.4vw,52px);font-weight:800;line-height:1.14;letter-spacing:var(--track);max-width:17ch}
+  html[dir=rtl] header.hero h1{max-width:26ch;line-height:1.4;font-size:clamp(28px,3.5vw,44px)}
+  header.hero p.sub{margin:0;max-width:56ch;font-size:16.5px;line-height:1.75;color:#d5ddf0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .chip{border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 14px;font-size:13.5px;font-weight:600;color:#eaf0ff;background:rgba(255,255,255,.07)}
+
+  .receipt-wrap{margin:0;filter:drop-shadow(0 22px 30px rgba(3,8,24,.45));transform:rotate(var(--tilt));justify-self:center;width:100%;max-width:390px}
+  .receipt{background:var(--paper);color:var(--paper-ink);padding:24px 26px 38px;
+    -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%;
+            mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%}
+  .r-head{text-align:center;font-family:var(--display);font-weight:800;font-size:16px;line-height:1.4}
+  .r-sub{text-align:center;font-size:12.5px;color:#6d6552;margin-top:2px}
+  .r-dash{border-top:1.5px dashed rgba(42,36,24,.4);margin:14px 0 10px}
+  .r-row{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:15px}
+  .r-row .dots{flex:1;border-bottom:1.5px dotted rgba(42,36,24,.35);transform:translateY(-4px);min-width:14px}
+  .r-row .v{font-variant-numeric:tabular-nums;font-weight:700}
+  .r-row.neg .v{color:var(--red)}
+  .r-rule{border-top:1.5px solid var(--paper-ink);margin:9px 0 7px}
+  .r-rule.double{border-top:4px double var(--paper-ink)}
+  .r-row.strong{font-weight:800;font-size:17px}
+  .r-row.strong .v{font-size:19px}
+  .r-foot{margin-top:14px;text-align:center;font-size:12.5px;color:#6d6552}
+  @keyframes print{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .receipt>*{opacity:0;animation:print .45s ease-out forwards;animation-delay:calc(var(--i,0) * 110ms + 350ms)}
+  @media (prefers-reduced-motion:reduce){.receipt>*{opacity:1;animation:none}html{scroll-behavior:auto}}
+
+  /* ---------- navigation ---------- */
+  nav{position:sticky;top:0;z-index:30;background:rgba(242,244,248,.88);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+  nav .navlist{display:flex;gap:4px;overflow-x:auto;padding:8px 28px;max-width:1280px;margin:0 auto;scrollbar-width:none}
+  nav .navlist::-webkit-scrollbar{display:none}
+  nav a{white-space:nowrap;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none;border-radius:999px}
+  nav a:hover{background:#e4e8f0;color:var(--ink)}
+  nav a.active{background:var(--ink);color:#fff}
+
+  /* ---------- sections ---------- */
+  section{padding:46px 0 10px}
+  section h2{font-family:var(--display);font-size:clamp(23px,2.6vw,30px);margin:0 0 6px;color:var(--ink);font-weight:800;letter-spacing:var(--track);line-height:1.3}
+  section p.desc{margin:0 0 22px;color:var(--muted);font-size:14.5px;max-width:76ch;line-height:1.8}
+  h3.sub-h{font-size:15px;margin:0;color:var(--ink);font-weight:700}
+
+  /* ---------- KPI scorecard ---------- */
+  .score-group{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;padding:22px 0;border-top:1px solid var(--line)}
+  .score-group:first-child{border-top:0;padding-top:6px}
+  .score-group h3.sub-h{font-family:var(--display);font-size:16.5px;line-height:1.4}
+  .g-count{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 15px 10px;position:relative;overflow:hidden;min-width:0}
+  .tile::before{content:"";position:absolute;inset-inline:0;top:0;height:3px;background:var(--line)}
+  .tile.good::before{background:var(--green)} .tile.bad::before{background:var(--red)}
+  .tile .t-label{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:flex-start;justify-content:space-between;line-height:1.45}
+  .tile .win{font-size:10.5px;font-weight:700;color:var(--teal);border:1px solid #b9dcdd;border-radius:8px;padding:0 6px;white-space:nowrap;background:var(--teal-l)}
+  .tile .t-value{font-family:var(--display);font-size:25px;font-weight:800;color:var(--ink);margin-top:6px;line-height:1.2;letter-spacing:var(--track)}
+  .tile .t-delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;margin-top:6px;padding:1px 9px;border-radius:999px;background:var(--line-2);color:var(--muted)}
+  .tile .t-delta.good{background:var(--green-l);color:var(--green)} .tile .t-delta.bad{background:var(--red-l);color:var(--red)}
+  .tile svg.spark{display:block;margin-top:8px;width:100%;height:28px;overflow:visible}
+  .tile.mini{padding:14px 15px 12px}
+  .tile.mini .t-value{font-size:22px}
+  .tile .t-sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.55}
+
+  /* ---------- cards, callouts, tables ---------- */
+  .grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+  .grid2.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+  .grid2>*,.grid3>*{min-width:0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 10px;min-width:0}
+  .card h3{font-family:var(--display);font-size:15.5px;margin:0 0 8px;color:var(--ink);font-weight:700;line-height:1.5}
+  .card p.cap{font-size:12.5px;color:var(--muted);margin:-3px 0 6px;line-height:1.7}
+  .insight{background:var(--surface);border:1px solid var(--line);border-inline-start:5px solid var(--teal);border-radius:12px;padding:16px 22px;font-size:15.5px;line-height:1.9;margin:0 0 20px;color:var(--ink-2);max-width:100%}
+  .insight b{color:var(--ink)}
+  .insight.warn{border-inline-start-color:var(--amber);background:#fffaf1}
+  table.simple{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.simple th{text-align:start;color:var(--muted);font-weight:700;font-size:12.5px;border-bottom:1px solid var(--line);padding:7px 8px}
+  table.simple td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:top}
+  table.simple td.n,table.simple th.n{text-align:end;font-variant-numeric:tabular-nums}
+  .tbl-wrap{overflow-x:auto;margin-bottom:10px}
+  footer{padding:46px 0 70px}
+  .maker-card{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;max-width:560px}
+  .maker-card .avatar{width:58px;height:58px;border-radius:50%;flex:none;object-fit:cover;border:2px solid var(--teal-l)}
+  .maker-card .name{font-family:var(--display);font-weight:800;color:var(--ink);font-size:16px}
+  .maker-card .role{color:var(--muted);font-size:13px;margin-top:2px}
+  .maker-card a{font-size:13px}
+  .foot-note{color:var(--muted);font-size:12.5px;margin-top:14px}
+  .foot-lang{margin-top:18px;font-size:13.5px}
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:minmax(0,1fr);gap:40px}
+    .grid2,.grid3,.grid2.even{grid-template-columns:minmax(0,1fr)}
+    .score-group{grid-template-columns:minmax(0,1fr);gap:12px}
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .wrap{padding:0 16px} nav .navlist{padding:8px 16px}
+    header.hero{padding-bottom:56px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="langswitch" aria-label="زبان">
+        <a href="../index.html" hreflang="en" lang="en">English</a><span lang="fa">فارسی</span>
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>شرکت ۱: رشد، حاشیه سود و هزینه‌ی هر سفارش</h1>
+        <p class="sub">یک بازار آنلاین سفارش غذا با داده‌های شبیه‌سازی‌شده؛ از تک‌تک سفارش‌ها تا تصمیم مدیریتی درباره‌ی رشد در برابر حاشیه سود. وابسته به هیچ شرکت واقعی نیست و روش‌شناسی در بخش «منابع» آمده است.</p>
+        <div class="chips" id="hero-chips"></div>
+      </div>
+      <figure class="receipt-wrap"><div class="receipt" id="receipt"></div></figure>
+    </div>
+  </div>
+</header>
+
+<nav><div class="navlist" id="navlist">
+  <a href="#overview">نمای کلی</a>
+  <a href="#financial">مالی</a>
+  <a href="#unit">اقتصاد واحد</a>
+  <a href="#customers">مشتریان</a>
+  <a href="#restaurants">رستوران‌ها</a>
+  <a href="#operations">عملیات</a>
+  <a href="#marketing">بازاریابی</a>
+  <a href="#forecast">پیش‌بینی</a>
+  <a href="#optimization">بهینه‌سازی</a>
+  <a href="#sources">منابع</a>
+</div></nav>
+
+<div class="wrap">
+
+<section id="overview">
+  <h2>نمای کلی مدیریتی — کارت امتیاز شاخص‌ها</h2>
+  <p class="desc">آخرین ماه در برابر ماه قبل برای ۳۴ شاخص در هفت گروه. هر کاشی مقدار، تغییر و نمودار کوچک ۱۲ ماهه را نشان می‌دهد؛ رنگ سبز یا قرمز نشان می‌دهد تغییر به نفع کسب‌وکار است یا به ضرر آن. کاشی‌های دارای برچسب «۳ ماهه» از پنجره‌ی ۳ ماهه‌ی اخیر استفاده می‌کنند (شاخص‌های وابسته به ثبت‌نام؛ بخش «منابع» را ببینید). برای دیدن تعریف هر شاخص، نشانگر را روی کاشی نگه دارید.</p>
+  <div id="scorecard"></div>
+  <div id="insight-overview" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>GMV و سفارش‌های تحویل‌شده به تفکیک ماه</h3><div id="c-gmv-orders" style="height:380px"></div></div>
+    <div class="card"><h3>سود مشارکتی به تفکیک شهر</h3><div id="c-city-profit" style="height:380px"></div></div>
+  </div>
+</section>
+
+<section id="financial">
+  <h2>عملکرد مالی</h2>
+  <p class="desc">درآمد، ساختار هزینه و عوامل مؤثر بر حاشیه سود مشارکتی. حاشیه سود مشارکتی اصلی پیش از تخفیف‌ها نشان داده می‌شود؛ نمای «پس از تخفیف‌ها» تخفیف‌هایی را که پلتفرم تأمین می‌کند از آن کم می‌کند.</p>
+  <div id="insight-financial" class="insight"></div>
+  <div class="grid2">
+    <div class="card"><h3>حاشیه سود مشارکتی: پیش از تخفیف‌ها و پس از آن</h3><p class="cap">فاصله‌ی دو خط همان هزینه‌ی تخفیف‌ها به‌عنوان سهمی از درآمد پلتفرم است.</p><div id="c-margin-promo" style="height:310px"></div></div>
+    <div class="card"><h3>ترکیب درآمد (۳ ماه اخیر)</h3><div id="c-revenue-mix" style="height:340px"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>ساختار هزینه‌ها در برابر درآمد پلتفرم</h3><div id="c-cost-structure" style="height:330px"></div></div>
+    <div class="card"><h3>تجزیه‌ی عوامل حاشیه سود (نخستین ماه در برابر آخرین ماه)</h3><div id="c-drivers" style="height:330px"></div></div>
+  </div>
+</section>
+
+<section id="unit">
+  <h2>اقتصاد واحد</h2>
+  <p class="desc">هر سفارش تحویل‌شده چه درآمدی برای پلتفرم دارد و چه هزینه‌ای — در مجموع، به تفکیک نوع غذا، رده‌ی رستوران و روش پرداخت.</p>
+  <div id="insight-unit" class="insight warn"></div>
+  <div class="grid2 even">
+    <div class="card"><h3>آبشار اقتصاد واحد — دلار به ازای هر سفارش</h3><p class="cap" id="waterfall-cap"></p><div id="c-waterfall" style="height:360px"></div></div>
+    <div class="card"><h3>درآمد در برابر هزینه‌ی خدمت‌دهی به ازای هر سفارش</h3><div id="c-rev-vs-cost" style="height:390px"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>حاشیه سود مشارکتی به تفکیک نوع غذا</h3><div id="c-cuisine" style="height:440px"></div></div>
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>به تفکیک رده‌ی رستوران</h3><div class="tbl-wrap" id="tbl-tier"></div></div>
+      <div class="card"><h3>به تفکیک روش پرداخت</h3><div class="tbl-wrap" id="tbl-payment"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="customers">
+  <h2>مشتریان و ماندگاری</h2>
+  <p class="desc">کیفیت جذب مشتری، ماندگاری، بخش‌بندی، اثر اشتراک و میزان تمرکز درآمد در پایگاه مشتریان.</p>
+  <div id="insight-customers" class="insight"></div>
+  <div class="tiles" id="cust-snapshot" style="margin-bottom:16px"></div>
+  <div class="grid2">
+    <div class="card"><h3>مشتریان فعال: جدید در برابر بازگشتی</h3><div id="c-new-returning" style="height:320px"></div></div>
+    <div class="card"><h3>ماندگاری ماه اول به تفکیک ماه</h3><div id="c-m1-ret" style="height:320px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>مشتریان به تفکیک بخش</h3><div id="c-segments" style="height:340px"></div></div>
+    <div class="card"><h3>سهم از مشتریان در برابر سهم از سود</h3><p class="cap">بخش‌هایی که سهم سودشان از سهم مشتریانشان بیشتر است، بیش از حد انتظار سودآورند.</p><div id="c-segment-profit" style="height:310px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>مشترکان در برابر غیرمشترکان</h3><div class="tbl-wrap" id="tbl-subscription"></div></div>
+    <div class="card"><h3>تمرکز درآمد (منحنی لورنز)</h3><div id="c-concentration" style="height:320px"></div></div>
+  </div>
+  <div class="card"><h3>نقشه‌ی حرارتی ماندگاری گروه‌های ثبت‌نام (درصد مشتریانی که هنوز سفارش می‌دهند)</h3><div id="c-cohort" style="height:400px"></div></div>
+</section>
+
+<section id="restaurants">
+  <h2>رستوران‌ها و عرضه</h2>
+  <p class="desc">کدام رستوران‌ها سود می‌سازند، حجم سفارش‌ها چقدر متمرکز است و عرضه چگونه با تقاضا هم‌گام می‌شود.</p>
+  <div id="insight-restaurants" class="insight"></div>
+  <div class="tiles" id="rest-tiles" style="margin-bottom:16px"></div>
+  <div class="grid2">
+    <div class="card"><h3>GMV رستوران در برابر حاشیه سود مشارکتی (هر نقطه = یک رستوران)</h3><div id="c-quadrant" style="height:400px"></div></div>
+    <div class="card"><h3>رستوران‌ها به تفکیک ناحیه</h3><div id="c-quadrant-bar" style="height:400px"></div></div>
+  </div>
+  <div class="card"><h3>عرضه: رستوران‌های فعال و سفارش به ازای هر رستوران</h3><div id="c-supply" style="height:360px"></div></div>
+</section>
+
+<section id="operations">
+  <h2>عملیات تحویل</h2>
+  <p class="desc">سرعت، قابلیت اتکا، لغو سفارش، اوج تقاضا، عملکرد شهرها و بهره‌وری پیک‌ها.</p>
+  <div id="insight-operations" class="insight"></div>
+  <div class="tiles" id="ops-tiles" style="margin-bottom:16px"></div>
+  <div class="grid2 even">
+    <div class="card"><h3>نرخ تحویل به‌موقع</h3><div id="c-ontime" style="height:300px"></div></div>
+    <div class="card"><h3>نرخ لغو سفارش</h3><div id="c-cancel" style="height:300px"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>نقشه‌ی حرارتی تقاضا — سفارش‌ها به تفکیک روز هفته × ساعت</h3><p class="cap">میانگین سفارش‌های تحویل‌شده در روز، ۳ ماه اخیر.</p><div id="c-heatmap" style="height:330px"></div></div>
+    <div class="card"><h3>دلیل لغو سفارش‌ها</h3><div id="c-cancel-reasons" style="height:330px"></div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px"><h3>کارت امتیاز شهرها</h3><p class="cap">سبز = بهتر، قرمز = بدتر در هر ستون.</p><div class="tbl-wrap" id="tbl-city"></div></div>
+  <div class="grid2">
+    <div class="card"><h3>بهره‌وری پیک‌ها</h3><div id="c-rider" style="height:360px"></div></div>
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>به تفکیک نوع وسیله‌ی نقلیه</h3><div class="tbl-wrap" id="tbl-vehicle"></div></div>
+      <div class="card"><h3>امتیاز مشتری بر اساس میزان تأخیر</h3><div id="c-delay-rating" style="height:230px"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="marketing">
+  <h2>کارایی بازاریابی و تخفیف‌ها</h2>
+  <p class="desc">هزینه‌ی جذب مشاهده‌شده به تفکیک کانال، CAC در برابر فرض‌های برنامه‌ریزی، نسبت LTV به CAC و هزینه‌ی واقعی تخفیف‌ها.</p>
+  <div id="insight-marketing" class="insight"></div>
+  <div class="tiles" id="mkt-tiles" style="margin-bottom:16px"></div>
+  <div class="grid2">
+    <div class="card"><h3>هزینه‌ی بازاریابی مشاهده‌شده به تفکیک کانال</h3><div id="c-spend-channel" style="height:340px"></div></div>
+    <div class="card"><h3>CAC ترکیبی به تفکیک ماه</h3><div id="c-cac-trend" style="height:340px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>CAC: فرض برنامه‌ریزی در برابر مشاهده‌شده (۳ ماه اخیر)</h3><div id="c-cac-compare" style="height:330px"></div></div>
+    <div class="card"><h3>نسبت LTV به CAC مشاهده‌شده به تفکیک کانال</h3><p class="cap">خط‌چین = نقطه‌ی سر به سر (۱). کانال سالم معمولاً ۳ یا بیشتر است.</p><div id="c-ltvcac" style="height:300px"></div></div>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>شدت تخفیف‌دهی</h3><div id="c-discount" style="height:320px"></div></div>
+    <div class="card"><h3>سفارش‌های دارای تخفیف در برابر بدون تخفیف</h3><p class="cap">سود پس از تخفیف‌ها، سود واقعی هر سفارشِ تخفیف‌دار است.</p><div class="tbl-wrap" id="tbl-promo"></div></div>
+  </div>
+</section>
+
+<section id="forecast">
+  <h2>پیش‌بینی و برنامه راهبردی</h2>
+  <p class="desc">چشم‌انداز ۱۲ ماهه با بازه‌ی ۸۰٪ و برنامه‌ی لازم برای رسیدن به ۲۵٪ رشد سفارش و ۲ واحد درصد افزایش حاشیه سود مشارکتی.</p>
+  <div id="insight-forecast" class="insight"></div>
+  <div class="card"><h3>سفارش‌های تحویل‌شده — داده تاریخی، پیش‌بینی و بازه ۸۰٪</h3><div id="c-forecast" style="height:390px"></div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>انتخاب مدل (اعتبارسنجی غلتان)</h3><div id="table-models"></div></div>
+    <div class="card"><h3>برنامه راهبردی: ۲۵٪ رشد سفارش و ۲ واحد درصد رشد حاشیه سود</h3><div id="plan-box" style="padding:8px 4px 14px;font-size:13.5px;line-height:1.8"></div></div>
+  </div>
+</section>
+
+<section id="optimization">
+  <h2>سناریو و بهینه‌سازی بودجه تخفیف</h2>
+  <p class="desc">سناریوهای بدبینانه / پایه / خوش‌بینانه‌ی سود و تخصیص بهینه‌ی یک بودجه‌ی ثابت تخفیف میان سلول‌های شهر × بخش مشتری.</p>
+  <div class="grid2 even">
+    <div class="card"><h3>سناریوها — سود مشارکتی</h3><div id="c-scenario" style="height:330px"></div></div>
+    <div class="card"><h3>بهینه‌سازی: هزینه‌ی پایه در برابر هزینه‌ی بهینه (سلول‌های برتر)</h3><div id="c-optimization" style="height:330px"></div></div>
+  </div>
+  <div class="insight" id="opt-summary" style="margin-top:16px"></div>
+</section>
+
+<section id="sources">
+  <h2>منابع و روش‌شناسی</h2>
+  <p class="desc">همه‌ی اعداد این صفحه از مجموعه‌داده‌ی شبیه‌سازی‌شده‌ی همین مخزن محاسبه شده‌اند. از داده‌ی هیچ شرکت واقعی استفاده نشده است.</p>
+  <div class="tbl-wrap">
+  <table class="simple">
+    <tr><th>مؤلفه</th><th>رویکرد</th></tr>
+    <tr><td>تولید داده</td><td>شبیه‌سازی تکرارپذیر با NumPy و pandas (بذر ثابت) از حدود ۱۲٬۰۰۰ مشتری، ۳۲۰ رستوران، ۵۲۰ پیک و حدود ۱۶۷ هزار سفارش در ۱۷ ماه، با فصلی‌بودن، روند رشد، منحنی‌های ریزش و ماندگاری و روابط مالی واقع‌گرایانه. نسخه‌ی ۲ دو جدول اضافه کرده است: هزینه‌ی بازاریابی مشاهده‌شده به تفکیک ماه × کانال و ساعت‌های آنلاین و مشغول پیک‌ها.</td></tr>
+    <tr><td>لایه‌ی شاخص‌ها</td><td>۳۴ شاخص کارت امتیاز که در src/analytics/kpis.py از جدول سفارش‌ها محاسبه می‌شوند. سفارش تحویل‌شده = تحویل‌شده + بازپرداخت‌شده. سود مشارکتی پیش از تخفیف‌هاست (تعریف اصلی مدل)؛ «پس از تخفیف‌ها» هزینه‌ی تخفیف را کم می‌کند. کارت امتیاز آخرین ماه را با ماه قبل مقایسه می‌کند.</td></tr>
+    <tr><td>پیش‌بینی</td><td>مدل‌های ساده‌ی فصلی، میانگین متحرک و هولت‌وینترز با اعتبارسنجی غلتان زمانی مقایسه شده‌اند و بهترین مدل برای هر شاخص بر اساس WAPE انتخاب می‌شود.</td></tr>
+    <tr><td>بهینه‌سازی</td><td>روش trust-constr در SciPy یک تخصیص بودجه‌ی تخفیف با پاسخ مقعر را میان سلول‌های شهر × بخش حل می‌کند و سود مشارکتی افزایشی را تحت یک بودجه‌ی ثابت بیشینه می‌کند.</td></tr>
+    <tr><td>بخش‌بندی</td><td>قاعده‌محور بر پایه‌ی تازگی، تناوب و ارزش پولی واقعی و وضعیت اشتراک — نه برچسب‌های تصادفی.</td></tr>
+    <tr><td>پنجره‌ی شاخص‌ها</td><td>ثبت‌نام مشتریان در یک بازه‌ی ثابت تولید می‌شود که در ۲۳ اوت ۲۰۲۶ پایان می‌یابد؛ پس آخرین ماه فقط بخشی از ثبت‌نام‌های خود را دارد. شاخص‌های وابسته به ثبت‌نام (مشتری جدید، سهم مشتریان جدید، هزینه‌ی بازاریابی، CAC و هزینه‌ی بازاریابی به درآمد) به همین دلیل از پنجره‌ی ۳ ماهه استفاده می‌کنند و با برچسب «۳ ماهه» مشخص شده‌اند.</td></tr>
+    <tr><td>محدودیت‌ها</td><td>همه‌ی داده‌ها شبیه‌سازی‌شده‌اند: الگوهایی مانند ماندگاری، اقتصاد کانال‌ها و حاشیه سود شهرها خروجی مدل‌اند، نه شواهد بازار. اقتصاد واحد هر سفارش از ۳ ماه اخیر محاسبه شده و LTV همان سود طول عمر مشاهده‌شده تا امروز است، نه پیش‌بینی. جدول‌های هزینه‌ی بازاریابی و ساعت‌های پیک هم تولید‌شده‌اند و تورم CAC کانال‌های پولی در آن‌ها از پیش لحاظ شده است؛ پس فاصله‌ی CAC «مشاهده‌شده» با فرض برنامه‌ریزی یک خروجی مدل است، نه شواهد بازار.</td></tr>
+  </table>
+  </div>
+  <div class="foot-note" id="generated-at"></div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="maker-card">
+      <img class="avatar" src="../assets/milad-shabani.jpg" alt="میلاد شعبانی">
+      <div>
+        <div class="name">میلاد شعبانی</div>
+        <div class="role">هوش تجاری | تحلیل داده | مهندسی داده</div>
+        <a href="https://miladshabani.ir" target="_blank" rel="noopener">miladshabani.ir</a> · <a href="https://github.com/Milad-Shabani" target="_blank" rel="noopener">github.com/Milad-Shabani</a>
+      </div>
+    </div>
+    <div class="foot-lang">🌐 این داشبورد به زبان انگلیسی هم موجود است: <a href="../index.html" hreflang="en" lang="en">English version</a></div>
+  </div>
+</footer>
+
+<script src="../data/dashboard_data.js"></script>
+<script>
+const LANG = "fa";
+const T = {"meta_title": "شرکت ۱ — داشبورد هوش تجاری", "meta_description": "داشبورد هوش تجاری شرکت ۱: مطالعه موردی بازار آنلاین سفارش غذا با داده‌های شبیه‌سازی‌شده؛ ۳۴ شاخص کلیدی مدیریتی، اقتصاد واحد، مشتریان، عملیات، کارایی بازاریابی، پیش‌بینی و بهینه‌سازی.", "meta_font_stack": "'VazirFD', 'Vazirmatn', Tahoma, 'Segoe UI', Arial, sans-serif", "meta_lang_label": "زبان", "meta_pct": "٪", "meta_pct_axis": "٪", "meta_separators": "٫٬", "hero_title": "شرکت ۱: رشد، حاشیه سود و هزینه‌ی هر سفارش", "hero_sub": "یک بازار آنلاین سفارش غذا با داده‌های شبیه‌سازی‌شده؛ از تک‌تک سفارش‌ها تا تصمیم مدیریتی درباره‌ی رشد در برابر حاشیه سود. وابسته به هیچ شرکت واقعی نیست و روش‌شناسی در بخش «منابع» آمده است.", "maker_name": "میلاد شعبانی", "maker_role": "هوش تجاری | تحلیل داده | مهندسی داده", "nav_overview": "نمای کلی", "nav_financial": "مالی", "nav_unit": "اقتصاد واحد", "nav_customers": "مشتریان", "nav_restaurants": "رستوران‌ها", "nav_operations": "عملیات", "nav_marketing": "بازاریابی", "nav_forecast": "پیش‌بینی", "nav_optimization": "بهینه‌سازی", "nav_sources": "منابع", "sec_overview_title": "نمای کلی مدیریتی — کارت امتیاز شاخص‌ها", "sec_overview_desc": "آخرین ماه در برابر ماه قبل برای ۳۴ شاخص در هفت گروه. هر کاشی مقدار، تغییر و نمودار کوچک ۱۲ ماهه را نشان می‌دهد؛ رنگ سبز یا قرمز نشان می‌دهد تغییر به نفع کسب‌وکار است یا به ضرر آن. کاشی‌های دارای برچسب «۳ ماهه» از پنجره‌ی ۳ ماهه‌ی اخیر استفاده می‌کنند (شاخص‌های وابسته به ثبت‌نام؛ بخش «منابع» را ببینید). برای دیدن تعریف هر شاخص، نشانگر را روی کاشی نگه دارید.", "sec_financial_title": "عملکرد مالی", "sec_financial_desc": "درآمد، ساختار هزینه و عوامل مؤثر بر حاشیه سود مشارکتی. حاشیه سود مشارکتی اصلی پیش از تخفیف‌ها نشان داده می‌شود؛ نمای «پس از تخفیف‌ها» تخفیف‌هایی را که پلتفرم تأمین می‌کند از آن کم می‌کند.", "sec_unit_title": "اقتصاد واحد", "sec_unit_desc": "هر سفارش تحویل‌شده چه درآمدی برای پلتفرم دارد و چه هزینه‌ای — در مجموع، به تفکیک نوع غذا، رده‌ی رستوران و روش پرداخت.", "sec_customers_title": "مشتریان و ماندگاری", "sec_customers_desc": "کیفیت جذب مشتری، ماندگاری، بخش‌بندی، اثر اشتراک و میزان تمرکز درآمد در پایگاه مشتریان.", "sec_restaurants_title": "رستوران‌ها و عرضه", "sec_restaurants_desc": "کدام رستوران‌ها سود می‌سازند، حجم سفارش‌ها چقدر متمرکز است و عرضه چگونه با تقاضا هم‌گام می‌شود.", "sec_operations_title": "عملیات تحویل", "sec_operations_desc": "سرعت، قابلیت اتکا، لغو سفارش، اوج تقاضا، عملکرد شهرها و بهره‌وری پیک‌ها.", "sec_marketing_title": "کارایی بازاریابی و تخفیف‌ها", "sec_marketing_desc": "هزینه‌ی جذب مشاهده‌شده به تفکیک کانال، CAC در برابر فرض‌های برنامه‌ریزی، نسبت LTV به CAC و هزینه‌ی واقعی تخفیف‌ها.", "sec_forecast_title": "پیش‌بینی و برنامه راهبردی", "sec_forecast_desc": "چشم‌انداز ۱۲ ماهه با بازه‌ی ۸۰٪ و برنامه‌ی لازم برای رسیدن به ۲۵٪ رشد سفارش و ۲ واحد درصد افزایش حاشیه سود مشارکتی.", "sec_optimization_title": "سناریو و بهینه‌سازی بودجه تخفیف", "sec_optimization_desc": "سناریوهای بدبینانه / پایه / خوش‌بینانه‌ی سود و تخصیص بهینه‌ی یک بودجه‌ی ثابت تخفیف میان سلول‌های شهر × بخش مشتری.", "sec_sources_title": "منابع و روش‌شناسی", "sec_sources_desc": "همه‌ی اعداد این صفحه از مجموعه‌داده‌ی شبیه‌سازی‌شده‌ی همین مخزن محاسبه شده‌اند. از داده‌ی هیچ شرکت واقعی استفاده نشده است.", "grp_growth": "رشد و مقیاس", "grp_profitability": "سودآوری", "grp_unit_economics": "اقتصاد واحد (به ازای هر سفارش)", "grp_customers": "مشتریان", "grp_operations": "عملیات تحویل", "grp_marketplace": "سلامت بازار دوطرفه", "grp_marketing": "کارایی بازاریابی", "kpi_gmv": "GMV", "kpi_gmv_yoy": "رشد GMV (سالانه)", "kpi_delivered_orders": "سفارش‌های تحویل‌شده", "kpi_active_customers": "مشتریان فعال", "kpi_orders_per_active_customer": "سفارش به ازای هر مشتری فعال", "kpi_platform_revenue": "درآمد پلتفرم", "kpi_take_rate": "نرخ کارمزد", "kpi_contribution_profit": "سود مشارکتی", "kpi_contribution_margin": "حاشیه سود مشارکتی", "kpi_contribution_per_order": "سود مشارکتی / سفارش", "kpi_aov": "میانگین ارزش سفارش (AOV)", "kpi_revenue_per_order": "درآمد / سفارش", "kpi_cost_to_serve": "هزینه‌ی خدمت‌دهی / سفارش", "kpi_delivery_fee_coverage": "پوشش هزینه‌ی ارسال", "kpi_promotion_burden": "بار تخفیف", "kpi_new_customers": "مشتری جدید / ماه", "kpi_new_share": "سهم مشتریان جدید", "kpi_m1_retention": "ماندگاری ماه اول", "kpi_subscriber_share": "سهم سفارش مشترکان", "kpi_on_time_rate": "نرخ تحویل به‌موقع", "kpi_avg_delivery_minutes": "میانگین زمان تحویل", "kpi_very_late_rate": "نرخ تأخیر زیاد (بیش از ۱۵ دقیقه)", "kpi_cancellation_rate": "نرخ لغو", "kpi_refund_rate": "نرخ بازپرداخت", "kpi_avg_rating": "میانگین امتیاز", "kpi_active_restaurants": "رستوران‌های فعال", "kpi_orders_per_restaurant": "سفارش / رستوران", "kpi_active_riders": "پیک‌های فعال", "kpi_rider_utilization": "بهره‌وری پیک‌ها", "kpi_orders_per_rider_hour": "سفارش / ساعت حضور پیک", "kpi_marketing_spend": "هزینه‌ی بازاریابی / ماه", "kpi_blended_cac": "CAC ترکیبی", "kpi_marketing_pct_revenue": "هزینه‌ی بازاریابی (٪ از درآمد)", "kpi_discount_rate": "نرخ تخفیف (از GMV)", "def_gmv": "ارزش ناخالص سفارش‌های تحویل‌شده (غذا + هزینه‌ی ارسال + کارمزد خدمات) در ماه.", "def_gmv_yoy": "GMV در مقایسه با همان ماه یک سال قبل.", "def_delivered_orders": "سفارش‌هایی با وضعیت «تحویل‌شده» یا «بازپرداخت‌شده».", "def_active_customers": "تعداد مشتریان متمایزی که در ماه دست‌کم یک سفارش تحویل‌شده داشته‌اند.", "def_orders_per_active_customer": "سفارش‌های تحویل‌شده تقسیم بر مشتریان فعال — تناوب سفارش.", "def_platform_revenue": "کمیسیون + کارمزد خدمات + ۳۵٪ هزینه‌ی ارسال، منهای اثر بازپرداخت.", "def_take_rate": "درآمد پلتفرم به‌عنوان سهمی از GMV.", "def_contribution_profit": "درآمد پلتفرم − هزینه‌ی پیک − هزینه‌ی پردازش پرداخت − ۵۰٪ بازپرداخت‌ها. تعریف اصلی مدل: پیش از تخفیف‌ها.", "def_contribution_margin": "سود مشارکتی به‌عنوان سهمی از درآمد پلتفرم (پیش از تخفیف‌ها).", "def_contribution_per_order": "سود مشارکتی تقسیم بر سفارش‌های تحویل‌شده.", "def_aov": "GMV تقسیم بر سفارش‌های تحویل‌شده.", "def_revenue_per_order": "درآمد پلتفرم تقسیم بر سفارش‌های تحویل‌شده.", "def_cost_to_serve": "درآمد پلتفرم − سود مشارکتی، به ازای هر سفارش تحویل‌شده (هزینه‌ی پیک + پرداخت + بازپرداخت).", "def_delivery_fee_coverage": "هزینه‌ی ارسال دریافتی به‌عنوان سهمی از هزینه‌ی پیک — چه بخشی از هزینه‌ی تحویل را مشتری پرداخت می‌کند.", "def_promotion_burden": "هزینه‌ی تخفیف (تخفیف‌های تأمین‌شده توسط پلتفرم) به‌عنوان سهمی از درآمد پلتفرم.", "def_new_customers": "مشتریانی که در همان ماه ثبت‌نام و سفارش داده‌اند؛ میانگین ۳ ماه اخیر.", "def_new_share": "مشتریان جدید به‌عنوان سهمی از مشتریان فعال؛ ۳ ماه اخیر تجمیع‌شده.", "def_m1_retention": "از مشتریانی که ماه قبل ثبت‌نام کرده‌اند، سهم کسانی که در این ماه سفارش داده‌اند.", "def_subscriber_share": "سهم سفارش‌های تحویل‌شده که مشتریان دارای اشتراک ثبت کرده‌اند.", "def_on_time_rate": "سفارش‌های تحویل‌شده‌ای که حداکثر ۵ دقیقه دیرتر از زمان تخمینی رسیده‌اند.", "def_avg_delivery_minutes": "میانگین زمان واقعی تحویل سفارش‌های تحویل‌شده.", "def_very_late_rate": "سفارش‌های تحویل‌شده‌ای که بیش از ۱۵ دقیقه دیر رسیده‌اند.", "def_cancellation_rate": "سفارش‌های لغوشده به‌عنوان سهمی از همه‌ی سفارش‌های ثبت‌شده.", "def_refund_rate": "سفارش‌های بازپرداخت‌شده به‌عنوان سهمی از سفارش‌های تحویل‌شده.", "def_avg_rating": "میانگین امتیاز مشتریان (۱ تا ۵) به سفارش‌های تحویل‌شده.", "def_active_restaurants": "رستوران‌هایی که در ماه دست‌کم یک سفارش تحویل‌شده داشته‌اند.", "def_orders_per_restaurant": "سفارش‌های تحویل‌شده تقسیم بر رستوران‌های فعال.", "def_active_riders": "پیک‌هایی که در ماه دست‌کم یک سفارش را تکمیل کرده‌اند.", "def_rider_utilization": "ساعت‌های مشغول به‌عنوان سهمی از ساعت‌های آنلاین همه‌ی پیک‌ها.", "def_orders_per_rider_hour": "سفارش‌های تحویل‌شده تقسیم بر ساعت‌های آنلاین پیک‌ها.", "def_marketing_spend": "هزینه‌ی جذب مشاهده‌شده در همه‌ی کانال‌ها؛ میانگین ماهانه‌ی ۳ ماه اخیر.", "def_blended_cac": "هزینه‌ی بازاریابی تقسیم بر تعداد ثبت‌نام‌ها؛ ۳ ماه اخیر تجمیع‌شده.", "def_marketing_pct_revenue": "هزینه‌ی بازاریابی به‌عنوان سهمی از درآمد پلتفرم؛ ۳ ماه اخیر تجمیع‌شده.", "def_discount_rate": "مبلغ تخفیف به‌عنوان سهمی از GMV.", "no_prior": "داده‌ی ماه قبل موجود نیست", "u_pp": "واحد درصد", "u_min": "دقیقه", "u_km": "کیلومتر", "win_3m": "۳ ماهه", "win_3m_title": "پنجره‌ی ۳ ماهه‌ی اخیر — ثبت‌نام‌های آخرین ماه ناقص است و یک ماه به‌تنهایی افت کاذب نشان می‌دهد.", "ins_overview": "<b>GMV نسبت به سال قبل {yoy} رشد کرده است<\/b> و سفارش‌ها با نرخ سالانه‌شده‌ی {growth} رشد می‌کنند. حاشیه سود مشارکتی اصلی پیش از تخفیف‌ها <b>{margin}<\/b> است، اما پس از کسر هزینه‌ی تخفیف‌ها فقط <b>{after}<\/b> می‌شود — تخفیف‌ها {promo} از درآمد پلتفرم را می‌بلعند. قوی‌ترین شهر <b>{best_city}<\/b> ({best_m} حاشیه) و ضعیف‌ترین <b>{worst_city}<\/b> ({worst_m}) است.", "ins_financial": "حاشیه سود مشارکتی (پیش از تخفیف‌ها) از <b>{first}<\/b> در نخستین ماه به <b>{latest}<\/b> در حال حاضر رسیده است. پس از کسر هزینه‌ی تخفیف‌ها <b>{after}<\/b> است: رشد با تخفیف خریداری می‌شود و کارایی تخفیف‌ها مهم‌ترین اهرم حاشیه سود است.", "ins_unit": "هر سفارش تحویل‌شده <b>{rev}<\/b> درآمد برای پلتفرم دارد و <b>{cost}<\/b> هزینه‌ی خدمت‌دهی، که <b>{contrib}<\/b> سود مشارکتی باقی می‌گذارد. سپس تخفیف‌ها به ازای هر سفارش <b>{promo}<\/b> برمی‌دارند و سود پس از تخفیف <b>{after}<\/b> می‌شود. هزینه‌ی ارسال دریافتی تنها {cover} از هزینه‌ی پیک را پوشش می‌دهد.", "ins_customers": "بهترین کانال جذب از نظر بازگشت <b>{channel}<\/b> است (نسبت LTV به CAC برابر {ratio}). ماندگاری پس از یک ماه {m1} و پس از سه ماه {m3} است. ۲۰٪ برتر مشتریان <b>{top20}<\/b> از GMV را می‌سازند. ریزش مشترکان {sub_churn} است، در برابر {non_churn} برای غیرمشترکان.", "ins_restaurants": "حجم سفارش‌ها در اقلیتی از رستوران‌ها متمرکز است. «تله‌ی حجم» یعنی درآمد بالا با حاشیه‌ی پایین؛ این رستوران‌ها نخستین کاندیدای بازنگری کمیسیون یا هزینه‌ی ارسال‌اند و «ستاره‌ها» باید حفظ شوند.", "ins_operations": "اوج تقاضا در ساعت‌های {peak} است — این سه ساعت <b>{peak_share}<\/b> از سفارش‌ها را دارند. در کل شبکه {ontime} از سفارش‌ها به‌موقع می‌رسند؛ ضعیف‌ترین شهر <b>{worst_city}<\/b> با {worst_ontime} است.", "ins_marketing": "شبکه‌های اجتماعی پولی و جستجوی پولی <b>{paid}<\/b> از هزینه‌ی جذب را می‌گیرند. نسبت LTV به CAC مشاهده‌شده برای <b>{best}<\/b> بهترین است ({best_ratio}) و برای شبکه‌های اجتماعی پولی ({ps}) و جستجوی پولی ({psr}) ضعیف است؛ CAC مشاهده‌شده‌ی جستجوی پولی {cac_up} بالاتر از فرض برنامه‌ریزی است.", "ins_forecast": "مدل منتخب برای سفارش‌های تحویل‌شده <b>{model}<\/b> است؛ سناریوی پایه‌ی ۱۲ ماهه با {end} سفارش در ماه به پایان می‌رسد. رسیدن به ۲۵٪ رشد سفارش و ۲ واحد درصد حاشیه سود به یک برنامه‌ی ترکیبی نیاز دارد، نه یک اهرم منفرد.", "ins_optimization": "بازتخصیص یک بودجه‌ی ثابت {budget} میان سلول‌های شهر × بخش با بیشترین پاسخ‌دهی، سود افزایشی مدل را <b>{gain}<\/b> بالا می‌برد (از {from} به {to}).", "waterfall_cap": "میانگین به ازای هر سفارش تحویل‌شده، {window}. میانگین ارزش سفارش {aov}.", "wf_revenue": "درآمد<br>پلتفرم", "wf_rider": "هزینه‌ی<br>پیک", "wf_payment": "پردازش<br>پرداخت", "wf_refund": "بازپرداخت<br>(۵۰٪)", "wf_contribution": "سود<br>مشارکتی", "wf_promo": "تخفیف‌ها", "wf_after": "پس از<br>تخفیف‌ها", "c_gmv_orders": "GMV و سفارش‌های تحویل‌شده به تفکیک ماه", "c_city_profit": "سود مشارکتی به تفکیک شهر", "c_margin_promo": "حاشیه سود مشارکتی: پیش از تخفیف‌ها و پس از آن", "c_margin_promo_cap": "فاصله‌ی دو خط همان هزینه‌ی تخفیف‌ها به‌عنوان سهمی از درآمد پلتفرم است.", "c_revenue_mix": "ترکیب درآمد (۳ ماه اخیر)", "c_cost_structure": "ساختار هزینه‌ها در برابر درآمد پلتفرم", "c_drivers": "تجزیه‌ی عوامل حاشیه سود (نخستین ماه در برابر آخرین ماه)", "c_waterfall": "آبشار اقتصاد واحد — دلار به ازای هر سفارش", "c_rev_vs_cost": "درآمد در برابر هزینه‌ی خدمت‌دهی به ازای هر سفارش", "c_cuisine": "حاشیه سود مشارکتی به تفکیک نوع غذا", "c_tier": "به تفکیک رده‌ی رستوران", "c_payment": "به تفکیک روش پرداخت", "c_new_returning": "مشتریان فعال: جدید در برابر بازگشتی", "c_m1_ret": "ماندگاری ماه اول به تفکیک ماه", "c_segments": "مشتریان به تفکیک بخش", "c_segment_profit": "سهم از مشتریان در برابر سهم از سود", "c_segment_profit_cap": "بخش‌هایی که سهم سودشان از سهم مشتریانشان بیشتر است، بیش از حد انتظار سودآورند.", "c_subscription": "مشترکان در برابر غیرمشترکان", "c_concentration": "تمرکز درآمد (منحنی لورنز)", "c_cohort": "نقشه‌ی حرارتی ماندگاری گروه‌های ثبت‌نام (درصد مشتریانی که هنوز سفارش می‌دهند)", "c_quadrant": "GMV رستوران در برابر حاشیه سود مشارکتی (هر نقطه = یک رستوران)", "c_quadrant_bar": "رستوران‌ها به تفکیک ناحیه", "c_supply": "عرضه: رستوران‌های فعال و سفارش به ازای هر رستوران", "c_ontime": "نرخ تحویل به‌موقع", "c_cancel": "نرخ لغو سفارش", "c_heatmap": "نقشه‌ی حرارتی تقاضا — سفارش‌ها به تفکیک روز هفته × ساعت", "c_heatmap_cap": "میانگین سفارش‌های تحویل‌شده در روز، ۳ ماه اخیر.", "c_cancel_reasons": "دلیل لغو سفارش‌ها", "c_city_scorecard": "کارت امتیاز شهرها", "c_city_scorecard_cap": "سبز = بهتر، قرمز = بدتر در هر ستون.", "c_rider": "بهره‌وری پیک‌ها", "c_vehicle": "به تفکیک نوع وسیله‌ی نقلیه", "c_delay_rating": "امتیاز مشتری بر اساس میزان تأخیر", "c_spend_channel": "هزینه‌ی بازاریابی مشاهده‌شده به تفکیک کانال", "c_cac_trend": "CAC ترکیبی به تفکیک ماه", "c_cac_compare": "CAC: فرض برنامه‌ریزی در برابر مشاهده‌شده (۳ ماه اخیر)", "c_ltvcac": "نسبت LTV به CAC مشاهده‌شده به تفکیک کانال", "c_ltvcac_cap": "خط‌چین = نقطه‌ی سر به سر (۱). کانال سالم معمولاً ۳ یا بیشتر است.", "c_discount": "شدت تخفیف‌دهی", "c_promo": "سفارش‌های دارای تخفیف در برابر بدون تخفیف", "c_promo_cap": "سود پس از تخفیف‌ها، سود واقعی هر سفارشِ تخفیف‌دار است.", "c_forecast": "سفارش‌های تحویل‌شده — داده تاریخی، پیش‌بینی و بازه ۸۰٪", "c_models": "انتخاب مدل (اعتبارسنجی غلتان)", "c_plan": "برنامه راهبردی: ۲۵٪ رشد سفارش و ۲ واحد درصد رشد حاشیه سود", "c_scenario": "سناریوها — سود مشارکتی", "c_optimization": "بهینه‌سازی: هزینه‌ی پایه در برابر هزینه‌ی بهینه (سلول‌های برتر)", "h_metric": "شاخص", "h_city": "شهر", "h_tier": "رده", "h_payment": "روش پرداخت", "h_vehicle": "وسیله‌ی نقلیه", "h_orders": "سفارش‌ها", "h_share": "سهم", "h_aov": "AOV", "h_rev_order": "درآمد / سفارش", "h_contrib_order": "سود مشارکتی / سفارش", "h_margin": "حاشیه", "h_rating": "امتیاز", "h_refund_rate": "نرخ بازپرداخت", "h_customers": "مشتریان", "h_orders_per_customer": "سفارش به ازای هر مشتری", "h_orders_per_month": "سفارش در ماه", "h_ltv": "سود طول عمر / مشتری", "h_discount_dep": "وابستگی به تخفیف", "h_churn": "نرخ ریزش", "h_ontime": "به‌موقع", "h_deliv_min": "دقیقه‌ی تحویل", "h_cancel": "نرخ لغو", "h_rider_order": "هزینه‌ی پیک / سفارش", "h_cost_km": "هزینه / کیلومتر", "h_util": "بهره‌وری", "h_with_promo": "با تخفیف", "h_no_promo": "بدون تخفیف", "h_order_share": "سهم از سفارش‌ها", "h_promo_order": "هزینه‌ی تخفیف / سفارش", "h_after_promo": "سود مشارکتی پس از تخفیف / سفارش", "h_selected_model": "مدل منتخب", "l_gmv": "GMV", "l_gmv_usd": "GMV (دلار)", "l_orders": "سفارش‌های تحویل‌شده", "l_profit_period": "سود مشارکتی (دلار، کل دوره)", "l_cm_before": "پیش از تخفیف‌ها", "l_cm_after": "پس از تخفیف‌ها", "l_margin_pct": "حاشیه (٪)", "l_commission": "کمیسیون", "l_delivery_fee": "هزینه‌ی ارسال", "l_service_fee": "کارمزد خدمات", "l_rider_cost": "هزینه‌ی پیک", "l_payment_cost": "پردازش پرداخت", "l_promo_cost": "تخفیف‌ها", "l_refunds": "بازپرداخت‌ها", "l_platform_revenue": "درآمد پلتفرم", "l_usd_month": "دلار در ماه", "l_driver_pp": "تغییر حاشیه (واحد درصد)", "l_usd_order": "دلار به ازای هر سفارش", "l_rev_order": "درآمد / سفارش", "l_cost_order": "هزینه‌ی خدمت‌دهی / سفارش", "l_rider_order": "هزینه‌ی پیک / سفارش", "l_promo_order": "هزینه‌ی تخفیف / سفارش", "l_active_customers": "مشتریان فعال", "l_returning": "بازگشتی", "l_activated_new": "جدید (ثبت‌نام و سفارش)", "l_m1": "ماندگاری ماه اول", "l_m1_axis": "ماندگار (٪)", "l_customer_share": "سهم از مشتریان", "l_profit_share": "سهم از سود", "l_share_pct": "سهم (٪)", "l_equality": "برابری کامل", "l_cum_gmv": "GMV تجمعی", "l_cum_gmv_axis": "سهم تجمعی از GMV (٪)", "l_top_customers": "مشتریان به ترتیب GMV (٪ از پایگاه)", "l_top20_note": "۲۰٪ برتر ← {v}٪ از GMV", "l_month_short": "ماه", "l_gmv_month": "GMV ماهانه (دلار)", "l_active_rest": "رستوران‌های فعال", "l_orders_rest": "سفارش به ازای هر رستوران", "l_very_late": "تأخیر زیاد (بیش از ۱۵ دقیقه)", "l_refund_rate": "نرخ بازپرداخت", "l_orders_day": "سفارش در روز", "l_hour": "ساعت شبانه‌روز", "l_per100": "لغو به ازای هر ۱۰۰ سفارش", "l_utilization": "بهره‌وری (٪)", "l_orders_hour": "سفارش / ساعت پیک", "l_avg_rating": "میانگین امتیاز", "l_blended_cac": "CAC ترکیبی", "l_usd_signup": "دلار به ازای هر ثبت‌نام", "l_cac_assumed": "فرض برنامه‌ریزی", "l_cac_observed": "مشاهده‌شده", "l_promo_orders": "سفارش‌های دارای تخفیف (٪)", "l_promo_rev": "هزینه‌ی تخفیف (٪ از درآمد)", "l_discount_gmv": "تخفیف (٪ از GMV)", "l_actuals": "واقعی", "l_upper80": "کران بالای ۸۰٪", "l_interval80": "بازه‌ی ۸۰٪", "l_forecast_base": "پیش‌بینی (پایه)", "l_verdict": "جمع‌بندی", "l_downside": "بدبینانه", "l_base": "پایه", "l_upside": "خوش‌بینانه", "l_profit_usd": "سود مشارکتی (دلار)", "l_baseline_spend": "هزینه‌ی پایه", "l_optimized_spend": "هزینه‌ی بهینه", "s_customers": "مشتریان", "s_customers_sub": "{n} نفر سفارش داده‌اند", "s_active60": "فعال (۶۰ روز)", "s_active60_sub": "سفارش در ۶۰ روز اخیر", "s_at_risk": "در معرض ریزش", "s_at_risk_sub": "آخرین سفارش ۶۰ تا ۹۰ روز پیش", "s_churned": "ریزش‌کرده", "s_churned_sub": "بیش از ۹۰ روز بدون سفارش", "s_orders_cust": "سفارش / مشتری", "s_orders_cust_sub": "کل دوره، مشتریان سفارش‌دهنده", "s_ltv": "سود طول عمر", "s_ltv_sub": "به ازای هر مشتری · GMV طول عمر {gmv}", "r_with_orders": "رستوران‌های دارای سفارش", "r_with_orders_sub": "دست‌کم یک سفارش تحویل‌شده", "r_top10": "سهم ۱۰ رستوران برتر از GMV", "r_top10_sub": "ده رستوران بزرگ", "r_top20": "سهم ۲۰٪ رستوران‌های برتر از GMV", "r_top20_sub": "تمرکز پارتو", "r_rating": "میانگین امتیاز رستوران‌ها", "r_rating_sub": "سفارش‌های تحویل‌شده، ۱ تا ۵", "o_peak": "سهم ساعت‌های اوج", "o_peak_sub": "شلوغ‌ترین ۳ ساعت: {h}", "o_weekend": "سهم آخر هفته", "o_weekend_sub": "سفارش‌های شنبه و یکشنبه", "o_holiday": "افزایش در تعطیلات", "o_holiday_sub": "سفارش روزانه در برابر روزهای غیرتعطیل", "o_eta": "خطای زمان تخمینی", "o_eta_sub": "میانگین فاصله‌ی مطلق با زمان تخمینی", "o_distance": "میانگین فاصله", "o_distance_sub": "سفارش‌های تحویل‌شده", "m_total_spend": "هزینه‌ی بازاریابی", "m_total_spend_sub": "کل دوره، مشاهده‌شده", "m_signups": "ثبت‌نام‌ها", "m_signups_sub": "کل دوره", "m_paid_share": "سهم کانال‌های پولی از هزینه", "m_paid_share_sub": "شبکه‌های اجتماعی پولی + جستجوی پولی", "m_promo_share": "سفارش‌های دارای تخفیف", "m_promo_share_sub": "میانگین تخفیف {d} از ارزش غذا", "p_cur_orders": "سفارش سالانه‌شده‌ی فعلی", "p_tgt_orders": "سفارش سالانه‌شده‌ی هدف (۲۵٪+)", "p_cur_margin": "حاشیه سود مشارکتی فعلی", "p_tgt_margin": "حاشیه سود مشارکتی هدف (۲ واحد درصد+)", "p_promo_burden": "بار تخفیف (آخرین ماه)", "src_h_component": "مؤلفه", "src_h_approach": "رویکرد", "src_data_k": "تولید داده", "src_data_v": "شبیه‌سازی تکرارپذیر با NumPy و pandas (بذر ثابت) از حدود ۱۲٬۰۰۰ مشتری، ۳۲۰ رستوران، ۵۲۰ پیک و حدود ۱۶۷ هزار سفارش در ۱۷ ماه، با فصلی‌بودن، روند رشد، منحنی‌های ریزش و ماندگاری و روابط مالی واقع‌گرایانه. نسخه‌ی ۲ دو جدول اضافه کرده است: هزینه‌ی بازاریابی مشاهده‌شده به تفکیک ماه × کانال و ساعت‌های آنلاین و مشغول پیک‌ها.", "src_kpi_k": "لایه‌ی شاخص‌ها", "src_kpi_v": "۳۴ شاخص کارت امتیاز که در src/analytics/kpis.py از جدول سفارش‌ها محاسبه می‌شوند. سفارش تحویل‌شده = تحویل‌شده + بازپرداخت‌شده. سود مشارکتی پیش از تخفیف‌هاست (تعریف اصلی مدل)؛ «پس از تخفیف‌ها» هزینه‌ی تخفیف را کم می‌کند. کارت امتیاز آخرین ماه را با ماه قبل مقایسه می‌کند.", "src_fc_k": "پیش‌بینی", "src_fc_v": "مدل‌های ساده‌ی فصلی، میانگین متحرک و هولت‌وینترز با اعتبارسنجی غلتان زمانی مقایسه شده‌اند و بهترین مدل برای هر شاخص بر اساس WAPE انتخاب می‌شود.", "src_opt_k": "بهینه‌سازی", "src_opt_v": "روش trust-constr در SciPy یک تخصیص بودجه‌ی تخفیف با پاسخ مقعر را میان سلول‌های شهر × بخش حل می‌کند و سود مشارکتی افزایشی را تحت یک بودجه‌ی ثابت بیشینه می‌کند.", "src_seg_k": "بخش‌بندی", "src_seg_v": "قاعده‌محور بر پایه‌ی تازگی، تناوب و ارزش پولی واقعی و وضعیت اشتراک — نه برچسب‌های تصادفی.", "src_def_k": "پنجره‌ی شاخص‌ها", "src_def_v": "ثبت‌نام مشتریان در یک بازه‌ی ثابت تولید می‌شود که در ۲۳ اوت ۲۰۲۶ پایان می‌یابد؛ پس آخرین ماه فقط بخشی از ثبت‌نام‌های خود را دارد. شاخص‌های وابسته به ثبت‌نام (مشتری جدید، سهم مشتریان جدید، هزینه‌ی بازاریابی، CAC و هزینه‌ی بازاریابی به درآمد) به همین دلیل از پنجره‌ی ۳ ماهه استفاده می‌کنند و با برچسب «۳ ماهه» مشخص شده‌اند.", "src_lim_k": "محدودیت‌ها", "src_lim_v": "همه‌ی داده‌ها شبیه‌سازی‌شده‌اند: الگوهایی مانند ماندگاری، اقتصاد کانال‌ها و حاشیه سود شهرها خروجی مدل‌اند، نه شواهد بازار. اقتصاد واحد هر سفارش از ۳ ماه اخیر محاسبه شده و LTV همان سود طول عمر مشاهده‌شده تا امروز است، نه پیش‌بینی. جدول‌های هزینه‌ی بازاریابی و ساعت‌های پیک هم تولید‌شده‌اند و تورم CAC کانال‌های پولی در آن‌ها از پیش لحاظ شده است؛ پس فاصله‌ی CAC «مشاهده‌شده» با فرض برنامه‌ریزی یک خروجی مدل است، نه شواهد بازار.", "generated_at": "زمان تولید داده: {d}", "names": {"Metroville": "متروویل", "Porthaven": "پورت‌هیون", "Rivertown": "ریورتاون", "Lakeside City": "لیک‌ساید سیتی", "Hillcrest": "هیل‌کرست", "Bayshore": "بی‌شور", "Northfield": "نورث‌فیلد", "Sunview": "سان‌ویو", "At Risk": "در معرض ریزش", "Churned": "ریزش‌کرده", "High Value": "ارزشمند", "Loyal": "وفادار", "New": "جدید", "Occasional": "گاه‌به‌گاه", "Price Sensitive": "حساس به قیمت", "Subscription": "اشتراکی", "Organic/Referral": "ارگانیک / معرفی", "Paid Social": "شبکه‌های اجتماعی پولی", "Paid Search": "جستجوی پولی", "Push/CRM": "پوش / CRM", "Partnership": "همکاری شرکایی", "Burgers": "برگر", "Sandwiches": "ساندویچ", "BBQ/Grill": "کباب و گریل", "Cafe/Breakfast": "کافه و صبحانه", "Asian": "آسیایی", "Healthy/Salads": "سالم و سالاد", "Desserts & Bakery": "دسر و نانوایی", "Vegan": "گیاهی", "Middle Eastern": "خاورمیانه‌ای", "Seafood": "دریایی", "Mexican": "مکزیکی", "Pizza": "پیتزا", "Indian": "هندی", "Fast Food": "فست‌فود", "Italian": "ایتالیایی", "Card": "کارت بانکی", "Wallet": "کیف پول", "Cash on Delivery": "پرداخت در محل", "BNPL": "خرید اعتباری (BNPL)", "Bike": "دوچرخه", "Scooter": "اسکوتر", "Car": "خودرو", "Budget": "اقتصادی", "Mid": "متوسط", "Premium": "ممتاز", "Subscribed": "مشترک", "Not Subscribed": "غیرمشترک", "holt_winters": "هولت‌وینترز", "moving_average": "میانگین متحرک", "seasonal_naive": "ساده‌ی فصلی", "delivered_orders": "سفارش‌های تحویل‌شده", "gmv": "GMV", "platform_revenue": "درآمد پلتفرم", "contribution_profit": "سود مشارکتی", "Discount rate (of GMV)": "نرخ تخفیف (از GMV)", "Refund rate": "نرخ بازپرداخت", "Revenue mix / take-rate": "ترکیب درآمد / نرخ کارمزد", "Payment processing rate": "نرخ پردازش پرداخت", "Rider cost rate (of revenue)": "نرخ هزینه‌ی پیک (از درآمد)", "On time or early": "به‌موقع<br>یا زودتر", "1-5 min late": "۱ تا ۵ دقیقه<br>تأخیر", "5-10 min late": "۵ تا ۱۰ دقیقه<br>تأخیر", "10-20 min late": "۱۰ تا ۲۰ دقیقه<br>تأخیر", "20+ min late": "بیش از ۲۰ دقیقه<br>تأخیر", "Restaurant Rejected": "رد توسط رستوران", "Customer Cancelled": "لغو توسط مشتری", "No Rider Available": "نبودِ پیک", "Long Wait": "انتظار طولانی"}, "quad": {"Star": "ستاره", "Volume Trap": "تله‌ی حجم", "Niche Profit": "سودآور تخصصی", "Review": "نیازمند بازنگری"}, "days": {"Mon": "دوشنبه", "Tue": "سه‌شنبه", "Wed": "چهارشنبه", "Thu": "پنجشنبه", "Fri": "جمعه", "Sat": "شنبه", "Sun": "یکشنبه"}, "verdicts": {"Achievable, but only with a combined plan -- no single lever gets there alone. The model shows the target requires simultaneous discount discipline, delivery-cost efficiency, and a modest take-rate increase, not organic growth alone.": "دست‌یافتنی است، اما فقط با یک برنامه‌ی ترکیبی — هیچ اهرم منفردی به‌تنهایی کافی نیست. مدل نشان می‌دهد هدف به انضباط هم‌زمان در تخفیف‌ها، کارایی هزینه‌ی تحویل و افزایش اندک نرخ کارمزد نیاز دارد، نه رشد ارگانیک به‌تنهایی."}, "u_to": "تا", "meta_display_stack": "'VazirFD', 'Vazirmatn', Tahoma, 'Segoe UI', Arial, sans-serif", "receipt_title": "میانگین یک سفارش تحویل‌شده", "receipt_aov": "میانگین ارزش سفارش", "chip_orders": "{n} سفارش تحویل‌شده", "chip_cities": "{n} شهر", "chip_asof": "داده‌ها تا {m}", "grp_count": "{n} شاخص"};
+const D = window.DASHBOARD_DATA;
+const FA = LANG === "fa";
+
+/* ------------------------------------------------------------------ helpers */
+const NM = T.names || {};
+const nm = s => (s in NM) ? NM[s] : String(s).replace(/_/g, " ");
+const tpl = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m));
+const sepFix = s => FA ? s.replace(/,/g, "٬").replace(/\./g, "٫") : s;
+const nf = (v, d = 0) => (v == null || isNaN(v)) ? "–" : (v < 0 && Number(Math.abs(v).toFixed(d)) !== 0 ? "−" : "") + sepFix(Math.abs(Number(v)).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}));
+const money = (v, d = 0) => v == null ? "–" : (v < 0 ? "−" : "") + "$" + nf(Math.abs(v), d);
+const pc = (v, d = 1) => v == null ? "–" : nf(v, d) + T.meta_pct;
+const ltr = s => `<span class="num">${s}</span>`;
+const $ = id => document.getElementById(id);
+const last = a => a[a.length - 1];
+
+const NAVY = "#1f2a44", TEAL = "#0f7c82", AMBER = "#b86a12", RED = "#b83c3c", GREEN = "#1a7a50", MUTED = "#9aa3b2";
+/* categorical identity colours: validated reference palette (colour-blind separation checked) */
+const CAT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#6250d6", "#008300"];
+const layoutBase = {
+  font: {family: T.meta_font_stack, color: "#2b3550", size: 12},
+  margin: {l: 56, r: 20, t: 10, b: 44}, paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+  legend: {orientation: "h", y: -0.22}, hovermode: "x unified", separators: T.meta_separators,
+  hoverlabel: {bgcolor: "#fff", bordercolor: "#d5dae4", font: {family: T.meta_font_stack, color: "#131a2b", size: 12}},
+  xaxis: {gridcolor: "#edf0f5", zeroline: false, ticks: "outside", ticklen: 8, tickcolor: "rgba(0,0,0,0)"}, yaxis: {gridcolor: "#edf0f5", zeroline: false, ticks: "outside", ticklen: 6, tickcolor: "rgba(0,0,0,0)"}
+};
+const cfg = {displayModeBar: false, responsive: true};
+/* Persian: Gregorian month names in Persian script on date axes, and plain grouped numbers instead of SI suffixes ("200k") */
+const FA_MONTHS = ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"];
+const monthLabel = v => { const [y, m] = v.split("-"); return FA ? FA_MONTHS[+m - 1] + " " + y : v; };
+const isMonth = v => typeof v === "string" && /^\d{4}-\d{2}(-\d{2})?$/.test(v);
+function localizeAxes(traces, L) {
+  ["", "2"].forEach(sfx => {
+    ["x", "y"].forEach(k => {
+      const axisKey = k + "axis" + sfx, ref = k + sfx;
+      const own = traces.filter(t => (t[k + "axis"] || k) === ref);
+      const vals = own.flatMap(t => Array.isArray(t[k]) ? t[k] : []);
+      if (!vals.length) return;
+      const A = L[axisKey] = {...(L[axisKey] || {})};
+      if (isMonth(vals[0])) {
+        if (A.tickvals || own.some(t => t.type === "heatmap")) return;
+        const uniq = [...new Set(vals)].sort(); const step = Math.max(1, Math.round(uniq.length / 6));
+        const tv = uniq.filter((_, i) => (uniq.length - 1 - i) % step === 0);
+        A.tickmode = "array"; A.tickvals = tv;
+        A.ticktext = tv.map(v => { const [y, m] = v.split("-"); return FA_MONTHS[+m - 1] + " " + y; });
+      } else if (typeof vals[0] === "number" && !A.tickformat && !A.ticksuffix && A.type !== "log" && !(own[0].type === "pie")) {
+        A.tickformat = ",.4~f";
+      }
+    });
+  });
+  traces.forEach(t => { if (t.type === "heatmap") t.colorbar = {...(t.colorbar || {}), tickformat: ",.4~f"}; });
+}
+const rle = s => (FA && typeof s === "string" && /[\u0600-\u06FF]/.test(s)) ? "\u202B" + s + "\u202C" : s;
+function plot(id, traces, layout = {}) {
+  const L = {...layoutBase, ...layout};
+  L.xaxis = {...layoutBase.xaxis, ...(layout.xaxis || {})};
+  L.yaxis = {...layoutBase.yaxis, ...(layout.yaxis || {})};
+  if (FA) {
+    if (!traces.some(t => t.type === "pie")) localizeAxes(traces, L);
+    Object.keys(L).forEach(k => {
+      if (/^[xy]axis\d*$/.test(k) && L[k] && L[k].title) L[k] = {...L[k], title: typeof L[k].title === "string" ? rle(L[k].title) : {...L[k].title, text: rle(L[k].title.text)}};
+    });
+    if (L.annotations) L.annotations = L.annotations.map(a => ({...a, text: rle(a.text)}));
+    traces.forEach(t => { if (t.name) t.name = rle(t.name); if (t.colorbar && t.colorbar.title) t.colorbar = {...t.colorbar, title: rle(t.colorbar.title)}; });
+  }
+  Plotly.newPlot(id, traces, L, cfg);
+}
+/* two measures with different units -> two stacked panels sharing the x axis (never a dual axis) */
+function stacked2(id, top, bottom, titles, extra = {}) {
+  const t1 = top.map(t => ({...t, xaxis: "x", yaxis: "y"}));
+  const t2 = bottom.map(t => ({...t, xaxis: "x2", yaxis: "y2"}));
+  plot(id, [...t1, ...t2], {
+    grid: {rows: 2, columns: 1, pattern: "independent"},
+    xaxis: {domain: [0, 1], anchor: "y", showticklabels: false, gridcolor: "#edf0f5"},
+    xaxis2: {domain: [0, 1], anchor: "y2", gridcolor: "#edf0f5"},
+    yaxis: {domain: [0.56, 1], anchor: "x", title: titles[0], gridcolor: "#edf0f5", zeroline: false, ...(extra.y1 || {})},
+    yaxis2: {domain: [0, 0.44], anchor: "x2", title: titles[1], gridcolor: "#edf0f5", zeroline: false, ...(extra.y2 || {})},
+    margin: {l: 64, r: 20, t: 10, b: 44}
+  });
+}
+function table(id, headers, rows, numCols = []) {
+  const th = headers.map((h, i) => `<th class="${numCols.includes(i) ? "n" : ""}">${h}</th>`).join("");
+  const tr = rows.map(r => "<tr>" + r.map((c, i) => `<td class="${numCols.includes(i) ? "n" : ""}">${c}</td>`).join("") + "</tr>").join("");
+  $(id).innerHTML = `<table class="simple"><tr>${th}</tr>${tr}</table>`;
+}
+function shade(v, min, max, higherBetter = true) {
+  if (v == null || max === min) return "";
+  let g = (v - min) / (max - min); if (!higherBetter) g = 1 - g;
+  const a = Math.abs(g - 0.5) * 0.55;
+  return `style="background:${g >= 0.5 ? `rgba(26,122,80,${a})` : `rgba(184,60,60,${a})`}"`;
+}
+function shadedCol(vals, higherBetter, fmt) {
+  const nums = vals.filter(v => v != null); const mn = Math.min(...nums), mx = Math.max(...nums);
+  return vals.map(v => ({html: ltr(fmt(v)), attr: shade(v, mn, mx, higherBetter)}));
+}
+function miniTiles(id, items) {
+  $(id).innerHTML = items.map(([label, value, sub]) => `
+    <div class="tile mini"><div class="t-label">${label}</div><div class="t-value">${value}</div>${sub ? `<div class="t-sub">${sub}</div>` : ""}</div>`).join("");
+}
+function sparkline(values, color) {
+  const W = 120, H = 26, P = 3, pts = values.map((v, i) => v == null ? null : [i, v]).filter(Boolean);
+  if (pts.length < 2) return "";
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const X = x => P + (x - x0) / Math.max(x1 - x0, 1) * (W - 2 * P);
+  const Y = y => H - P - (y - y0) / Math.max(y1 - y0, 1e-9) * (H - 2 * P);
+  const d = pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+  const lp = last(pts);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><circle cx="${X(lp[0]).toFixed(1)}" cy="${Y(lp[1]).toFixed(1)}" r="2.4" fill="${color}" stroke="#fff" stroke-width="1"/></svg>`;
+}
+function fmtKpi(it, v) {
+  switch (it.fmt) {
+    case "money0": return money(v, 0); case "money2": return money(v, 2);
+    case "int": return nf(v, 0); case "pct1": return pc(v, 1);
+    case "dec1": return nf(v, 1); case "dec2": return nf(v, 2);
+    case "min1": return nf(v, 1) + " " + T.u_min;
+  }
+  return nf(v, 2);
+}
+
+/* ---------------------------------------------------------------- scorecard */
+const SC = D.scorecard;
+const scById = {}; SC.groups.forEach(g => g.items.forEach(it => scById[it.key] = it));
+$("scorecard").innerHTML = SC.groups.map(g => `
+  <div class="score-group">
+    <div><h3 class="sub-h">${T["grp_" + g.key]}</h3><div class="g-count">${tpl(T.grp_count, {n: ltr(nf(g.items.length))})}</div></div>
+    <div class="tiles">${g.items.map(it => {
+      const d = it.delta;
+      let cls = "", arrow = "●";
+      if (d != null && Math.abs(d) >= 0.05) {
+        arrow = d > 0 ? "▲" : "▼";
+        if (it.good === "up") cls = d > 0 ? "good" : "bad"; else if (it.good === "down") cls = d < 0 ? "good" : "bad";
+      }
+      const dtxt = d == null ? T.no_prior : `${arrow} ${ltr(nf(Math.abs(d), 1) + (it.delta_kind === "pp" ? " " + T.u_pp : T.meta_pct))}`;
+      const color = cls === "bad" ? RED : cls === "good" ? GREEN : TEAL;
+      return `<div class="tile ${cls}" title="${T["def_" + it.key]}">
+        <div class="t-label"><span>${T["kpi_" + it.key]}</span>${it.window === "3M" ? `<span class="win" title="${T.win_3m_title}">${T.win_3m}</span>` : ""}</div>
+        <div class="t-value">${ltr(fmtKpi(it, it.value))}</div>
+        <div class="t-delta ${cls}">${dtxt}</div>${sparkline(it.spark, color)}</div>`;
+    }).join("")}</div>
+  </div>`).join("");
+
+/* ------------------------------------------------------------------- hero */
+(function () {
+  const W = D.unit_econ.waterfall, strip = s => s.replace(/<br>/g, " ");
+  const win = D.unit_econ.window.split(" to ").map(ltr).join(" " + T.u_to + " ");
+  const row = (label, v, cls = "") => `<div class="r-row ${cls}"><span>${strip(label)}</span><span class="dots"></span><span class="v">${ltr(money(v, 2))}</span></div>`;
+  const parts = [
+    `<div class="r-head">${T.receipt_title}</div><div class="r-sub">${win}</div><div class="r-dash"></div>`,
+    row(T.wf_revenue, W.revenue_per_order), row(T.wf_rider, W.rider_cost, "neg"), row(T.wf_payment, W.payment_cost, "neg"), row(T.wf_refund, W.refund_cost, "neg"),
+    `<div class="r-rule"></div>`, row(T.wf_contribution, W.contribution_per_order, "strong"),
+    row(T.wf_promo, W.promotion_cost, "neg"),
+    `<div class="r-rule double"></div>`, row(T.wf_after, W.contribution_after_promo_per_order, "strong" + (W.contribution_after_promo_per_order < 0 ? " neg" : "")),
+    `<div class="r-foot">${T.receipt_aov}: ${ltr(money(W.aov, 2))}</div>`,
+  ];
+  $("receipt").innerHTML = parts.map((h, i) => h.replace(/^<div /, `<div style="--i:${i}" `)).join("");
+  const orders = D.financial.delivered_orders.reduce((a, b) => a + b, 0);
+  $("hero-chips").innerHTML = [
+    tpl(T.chip_orders, {n: ltr(nf(orders))}), tpl(T.chip_cities, {n: ltr(nf(D.cities.names.length))}),
+    tpl(T.chip_asof, {m: monthLabel(SC.as_of)}),
+  ].map(t => `<span class="chip">${t}</span>`).join("");
+})();
+
+const E = D.monthly_ext, F = D.financial, K = D.kpis, FD = D.findings;
+const sc = k => scById[k].value;
+const lastE = k => last(E[k]);
+
+$("insight-overview").innerHTML = tpl(T.ins_overview, {
+  yoy: ltr(nf(sc("gmv_yoy"), 0) + T.meta_pct), growth: ltr(nf(K.orders_growth_annualized_pct, 0) + T.meta_pct),
+  margin: ltr(pc(K.contribution_margin_pct, 1)), after: ltr(pc(lastE("contribution_after_promo_margin_pct"), 0)),
+  promo: ltr(pc(sc("promotion_burden"), 0)),
+  best_city: nm(FD.highest_margin_city.city), best_m: ltr(pc(FD.highest_margin_city.contribution_margin_pct, 1)),
+  worst_city: nm(FD.weakest_margin_city.city), worst_m: ltr(pc(FD.weakest_margin_city.contribution_margin_pct, 1)),
+});
+
+/* GMV (bars) and orders (line): two panels, one x axis */
+stacked2("c-gmv-orders",
+  [{x: F.months, y: F.gmv, type: "bar", name: T.l_gmv, marker: {color: TEAL}, showlegend: false}],
+  [{x: F.months, y: F.delivered_orders, type: "scatter", mode: "lines+markers", name: T.l_orders, line: {color: NAVY, width: 3}, showlegend: false}],
+  [T.l_gmv_usd, T.l_orders]);
+
+plot("c-city-profit", [{
+  x: D.cities.contribution_profit, y: D.cities.names.map(nm), type: "bar", orientation: "h",
+  marker: {color: D.cities.contribution_profit.map(v => v >= 0 ? GREEN : RED)},
+  hovertemplate: "%{y}: $%{x:,.0f}<extra></extra>",
+}], {xaxis: {title: T.l_profit_period}, margin: {l: 110, r: 20, t: 10, b: 44}, hovermode: "closest", yaxis: {autorange: "reversed"}});
+
+/* ---------------------------------------------------------------- financial */
+$("insight-financial").innerHTML = tpl(T.ins_financial, {
+  first: ltr(pc(F.contribution_margin_pct[0], 1)), latest: ltr(pc(last(F.contribution_margin_pct), 1)),
+  after: ltr(pc(lastE("contribution_after_promo_margin_pct"), 0)),
+});
+plot("c-margin-promo", [
+  {x: F.months, y: F.contribution_margin_pct, type: "scatter", mode: "lines+markers", name: T.l_cm_before, line: {color: TEAL, width: 3}},
+  {x: F.months, y: E.contribution_after_promo_margin_pct, type: "scatter", mode: "lines+markers", name: T.l_cm_after, line: {color: RED, width: 3, dash: "dot"}},
+], {yaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}});
+
+const last3 = k => F[k].slice(-3).reduce((a, b) => a + b, 0);
+plot("c-revenue-mix", [{
+  labels: [T.l_commission, T.l_delivery_fee, T.l_service_fee],
+  values: [last3("commission_revenue"), last3("delivery_fee_collected"), last3("service_fee_revenue")],
+  type: "pie", hole: .55, marker: {colors: [CAT[0], CAT[1], CAT[2]], line: {color: "#fff", width: 2}}, textinfo: "label+percent", insidetextorientation: "horizontal",
+  sort: false, hovertemplate: "%{label}: $%{value:,.0f}<extra></extra>",
+}], {showlegend: false, margin: {l: 10, r: 10, t: 10, b: 10}, hovermode: "closest"});
+
+plot("c-cost-structure", [
+  {x: F.months, y: F.rider_cost, type: "bar", name: T.l_rider_cost, marker: {color: CAT[0], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.payment_processing_cost, type: "bar", name: T.l_payment_cost, marker: {color: CAT[1], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.promotion_cost, type: "bar", name: T.l_promo_cost, marker: {color: CAT[3], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.refund_amount, type: "bar", name: T.l_refunds, marker: {color: CAT[4], line: {color: "#fff", width: 1}}},
+  {x: F.months, y: F.platform_revenue, type: "scatter", mode: "lines", name: T.l_platform_revenue, line: {color: NAVY, width: 2.5}},
+], {barmode: "stack", yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.28}});
+
+plot("c-drivers", [{
+  x: D.drivers.values, y: D.drivers.labels.map(nm), type: "bar", orientation: "h",
+  marker: {color: D.drivers.values.map(v => v >= 0 ? GREEN : RED)}, hovermode: "closest",
+}], {xaxis: {title: T.l_driver_pp}, margin: {l: 200, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+/* ----------------------------------------------------------- unit economics */
+const W = D.unit_econ.waterfall;
+$("insight-unit").innerHTML = tpl(T.ins_unit, {
+  rev: ltr(money(W.revenue_per_order, 2)), cost: ltr(money(-(W.rider_cost + W.payment_cost + W.refund_cost), 2)),
+  contrib: ltr(money(W.contribution_per_order, 2)), promo: ltr(money(-W.promotion_cost, 2)), after: ltr(money(W.contribution_after_promo_per_order, 2)),
+  cover: ltr(pc(sc("delivery_fee_coverage"), 0)),
+});
+$("waterfall-cap").innerHTML = tpl(T.waterfall_cap, {window: D.unit_econ.window.split(" to ").map(ltr).join(" " + T.u_to + " "), aov: ltr(money(W.aov, 2))});
+plot("c-waterfall", [{
+  type: "waterfall", orientation: "v",
+  x: [T.wf_revenue, T.wf_rider, T.wf_payment, T.wf_refund, T.wf_contribution, T.wf_promo, T.wf_after],
+  measure: ["relative", "relative", "relative", "relative", "total", "relative", "total"],
+  y: [W.revenue_per_order, W.rider_cost, W.payment_cost, W.refund_cost, 0, W.promotion_cost, 0],
+  text: [W.revenue_per_order, W.rider_cost, W.payment_cost, W.refund_cost, W.contribution_per_order, W.promotion_cost, W.contribution_after_promo_per_order].map(v => money(v, 2)),
+  textposition: "outside", cliponaxis: false,
+  increasing: {marker: {color: CAT[2]}}, decreasing: {marker: {color: RED}}, totals: {marker: {color: NAVY}},
+  connector: {line: {color: MUTED, width: 1}},
+  hoverinfo: "x+text",
+}], {yaxis: {title: T.l_usd_order, rangemode: "tozero"}, hovermode: "closest", margin: {l: 56, r: 10, t: 24, b: 70}, xaxis: {tickangle: 0, automargin: true}});
+
+plot("c-rev-vs-cost", [
+  {x: E.months, y: E.revenue_per_order, type: "scatter", mode: "lines+markers", name: T.l_rev_order, line: {color: TEAL, width: 3}},
+  {x: E.months, y: E.cost_to_serve_per_order, type: "scatter", mode: "lines+markers", name: T.l_cost_order, line: {color: RED, width: 3}},
+  {x: E.months, y: E.rider_cost_per_order, type: "scatter", mode: "lines", name: T.l_rider_order, line: {color: CAT[0], width: 1.8, dash: "dot"}},
+  {x: E.months, y: E.promotion_cost_per_order, type: "scatter", mode: "lines", name: T.l_promo_order, line: {color: CAT[3], width: 1.8, dash: "dash"}},
+], {yaxis: {title: T.l_usd_order, rangemode: "tozero"}, legend: {orientation: "h", y: -0.28}});
+
+const UC = D.unit_econ.by_cuisine;
+const cuiIdx = UC.names.map((_, i) => i).sort((a, b) => UC.contribution_margin_pct[a] - UC.contribution_margin_pct[b]);
+plot("c-cuisine", [{
+  x: cuiIdx.map(i => UC.contribution_margin_pct[i]), y: cuiIdx.map(i => nm(UC.names[i])), type: "bar", orientation: "h",
+  marker: {color: cuiIdx.map(i => UC.contribution_margin_pct[i] >= 0 ? TEAL : RED)},
+  customdata: cuiIdx.map(i => [UC.orders[i], UC.contribution_profit_per_order[i], UC.aov[i]]),
+  hovertemplate: "%{y}<br>" + T.h_margin + ": %{x:.1f}%<br>" + T.h_orders + ": %{customdata[0]:,}<br>" + T.h_contrib_order + ": $%{customdata[1]:.2f}<extra></extra>",
+}], {xaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}, margin: {l: 130, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+function ueTable(id, U, firstHeader, extra) {
+  const hdr = [firstHeader, T.h_orders, T.h_aov, T.h_rev_order, T.h_contrib_order, T.h_margin, ...extra.map(e => e[0])];
+  const rows = U.names.map((n, i) => [nm(n), ltr(nf(U.orders[i])), ltr(money(U.aov[i], 2)), ltr(money(U.revenue_per_order[i], 2)),
+    ltr(money(U.contribution_profit_per_order[i], 2)), ltr(pc(U.contribution_margin_pct[i], 1)), ...extra.map(e => ltr(e[1](i)))]);
+  table(id, hdr, rows, [1, 2, 3, 4, 5, ...extra.map((_, j) => 6 + j)]);
+}
+ueTable("tbl-tier", D.unit_econ.by_tier, T.h_tier, [[T.h_rating, i => nf(D.unit_econ.by_tier.avg_rating[i], 2)]]);
+ueTable("tbl-payment", D.unit_econ.by_payment, T.h_payment, [[T.h_refund_rate, i => pc(D.unit_econ.by_payment.refund_rate_pct[i], 1)]]);
+
+/* --------------------------------------------------------------- customers */
+const CE = D.customers_ext, SN = CE.snapshot;
+$("insight-customers").innerHTML = tpl(T.ins_customers, {
+  channel: nm(FD.best_ltv_cac_channel.channel), ratio: ltr(nf(FD.best_ltv_cac_channel.ltv_to_cac, 2) + "x"),
+  m1: ltr(pc(D.cohorts.m1_retention_avg, 0)), m3: ltr(pc(D.cohorts.m3_retention_avg, 0)),
+  top20: ltr(pc(CE.concentration.top20_share_pct, 0)), sub_churn: ltr(pc(CE.subscription.churn_rate_pct[0], 0)), non_churn: ltr(pc(CE.subscription.churn_rate_pct[1], 0)),
+});
+miniTiles("cust-snapshot", [
+  [T.s_customers, ltr(nf(SN.customers_total)), tpl(T.s_customers_sub, {n: ltr(nf(SN.customers_ordered))})],
+  [T.s_active60, ltr(pc(SN.active_60d_pct, 1)), T.s_active60_sub],
+  [T.s_at_risk, ltr(pc(SN.at_risk_pct, 1)), T.s_at_risk_sub],
+  [T.s_churned, ltr(pc(SN.churned_pct, 1)), T.s_churned_sub],
+  [T.s_orders_cust, ltr(nf(SN.avg_orders_per_customer, 1)), T.s_orders_cust_sub],
+  [T.s_ltv, ltr(money(SN.avg_lifetime_profit, 2)), tpl(T.s_ltv_sub, {gmv: ltr(money(SN.avg_lifetime_gmv, 0))})],
+]);
+plot("c-new-returning", [
+  {x: E.months, y: E.returning_customers, type: "bar", name: T.l_returning, marker: {color: CAT[0], line: {color: "#fff", width: 1}}},
+  {x: E.months, y: E.activated_new_customers, type: "bar", name: T.l_activated_new, marker: {color: CAT[1], line: {color: "#fff", width: 1}}},
+], {barmode: "stack", yaxis: {title: T.l_active_customers}});
+plot("c-m1-ret", [{
+  x: E.months, y: E.m1_retention_pct, type: "scatter", mode: "lines+markers", name: T.l_m1, line: {color: TEAL, width: 3},
+}], {yaxis: {title: T.l_m1_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}});
+plot("c-segments", [{
+  labels: D.segments.names.map(nm), values: D.segments.customer_counts, type: "pie", hole: .5, sort: false,
+  marker: {colors: CAT.concat(["#8a8f9c"]), line: {color: "#fff", width: 2}}, textinfo: "percent", textposition: "inside", insidetextorientation: "horizontal",
+  hovertemplate: "%{label}: %{value:,} (%{percent})<extra></extra>",
+}], {showlegend: true, legend: {orientation: "v", x: 1.02, y: 0.5}, margin: {l: 10, r: 10, t: 10, b: 10}, hovermode: "closest"});
+const SP = CE.segment_profile;
+const custShare = SP.customers.map(c => c / SP.customers.reduce((a, b) => a + b, 0) * 100);
+plot("c-segment-profit", [
+  {x: SP.names.map(nm), y: custShare, type: "bar", name: T.l_customer_share, marker: {color: MUTED}},
+  {x: SP.names.map(nm), y: SP.profit_share_pct, type: "bar", name: T.l_profit_share, marker: {color: TEAL}},
+], {barmode: "group", yaxis: {title: T.l_share_pct, ticksuffix: T.meta_pct}, xaxis: {tickangle: -30, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 80}, legend: {orientation: "h", y: -0.4}});
+
+const SB = CE.subscription;
+table("tbl-subscription", [T.h_metric, nm("Subscribed"), nm("Not Subscribed")], [
+  [T.h_customers, ltr(nf(SB.customers[0])), ltr(nf(SB.customers[1]))],
+  [T.h_orders_per_customer, ltr(nf(SB.orders_per_customer[0], 1)), ltr(nf(SB.orders_per_customer[1], 1))],
+  [T.h_orders_per_month, ltr(nf(SB.orders_per_month[0], 2)), ltr(nf(SB.orders_per_month[1], 2))],
+  [T.h_aov, ltr(money(SB.aov[0], 2)), ltr(money(SB.aov[1], 2))],
+  [T.h_contrib_order, ltr(money(SB.contribution_per_order[0], 2)), ltr(money(SB.contribution_per_order[1], 2))],
+  [T.h_ltv, ltr(money(SB.lifetime_profit_per_customer[0], 2)), ltr(money(SB.lifetime_profit_per_customer[1], 2))],
+  [T.h_discount_dep, ltr(pc(SB.discount_dependency_pct[0], 1)), ltr(pc(SB.discount_dependency_pct[1], 1))],
+  [T.h_churn, ltr(pc(SB.churn_rate_pct[0], 1)), ltr(pc(SB.churn_rate_pct[1], 1))],
+], [1, 2]);
+const CC = CE.concentration;
+plot("c-concentration", [
+  {x: CC.x_pct_customers, y: CC.x_pct_customers, type: "scatter", mode: "lines", name: T.l_equality, line: {color: MUTED, width: 1.5, dash: "dash"}},
+  {x: CC.x_pct_customers, y: CC.y_pct_gmv, type: "scatter", mode: "lines+markers", name: T.l_cum_gmv, line: {color: TEAL, width: 3}, fill: "tonexty", fillcolor: "rgba(15,124,130,0.10)"},
+], {xaxis: {title: T.l_top_customers, ticksuffix: T.meta_pct}, yaxis: {title: T.l_cum_gmv_axis, ticksuffix: T.meta_pct, range: [0, 100]},
+    annotations: [{x: 20, y: CC.top20_share_pct, text: tpl(T.l_top20_note, {v: nf(CC.top20_share_pct, 0)}), showarrow: true, ax: 60, ay: 30, font: {size: 11}}]});
+
+plot("c-cohort", [{
+  z: D.cohorts.matrix, x: D.cohorts.month_numbers.map(m => T.l_month_short + " " + m), y: D.cohorts.cohort_labels.map(monthLabel),
+  type: "heatmap", colorscale: [[0, "#eef6f6"], [1, "#0f7c82"]], zmin: 0, hoverongaps: false, colorbar: {title: T.meta_pct},
+  hovertemplate: "%{y} · %{x}: %{z:.1f}%<extra></extra>",
+}], {yaxis: {type: "category", dtick: 2}, margin: {l: 90, r: 20, t: 10, b: 44}, hovermode: "closest"});
+
+/* -------------------------------------------------------------- restaurants */
+const QC = {
+  "Star: High Revenue / High Margin": GREEN, "Volume Trap: High Revenue / Low Margin": CAT[3],
+  "Niche Profit: Low Revenue / High Margin": TEAL, "Review: Low Revenue / Low Margin": RED,
+};
+const qShort = q => { const k = q.split(":")[0]; return (T.quad && T.quad[k]) || k; };
+const RX = D.restaurants_ext;
+$("insight-restaurants").innerHTML = T.ins_restaurants;
+miniTiles("rest-tiles", [
+  [T.r_with_orders, ltr(nf(RX.restaurants_with_orders)), T.r_with_orders_sub],
+  [T.r_top10, ltr(pc(RX.top10_share_pct, 1)), T.r_top10_sub],
+  [T.r_top20, ltr(pc(RX.top20pct_share_pct, 1)), T.r_top20_sub],
+  [T.r_rating, ltr(nf(RX.avg_rating, 2)), T.r_rating_sub],
+]);
+const rq = D.restaurants.scatter;
+plot("c-quadrant", [...new Set(rq.quadrant)].map(q => ({
+  x: rq.gmv.filter((_, i) => rq.quadrant[i] === q), y: rq.margin_pct.filter((_, i) => rq.quadrant[i] === q),
+  text: rq.name.filter((_, i) => rq.quadrant[i] === q), mode: "markers", type: "scatter", name: qShort(q),
+  marker: {color: QC[q] || MUTED, size: 8, opacity: .8, line: {color: "#fff", width: 1}},
+  hovertemplate: "%{text}<br>GMV $%{x:,.0f} · %{y:.1f}%<extra></extra>",
+})), {xaxis: {title: T.l_gmv_month}, yaxis: {title: T.l_margin_pct, ticksuffix: T.meta_pct}, hovermode: "closest"});
+plot("c-quadrant-bar", [{
+  x: D.restaurants.quadrant_counts, y: D.restaurants.quadrant_labels.map(qShort), type: "bar", orientation: "h",
+  marker: {color: D.restaurants.quadrant_labels.map(q => QC[q] || MUTED)}, hovermode: "closest",
+}], {margin: {l: 120, r: 20, t: 10, b: 44}, hovermode: "closest", yaxis: {autorange: "reversed"}});
+stacked2("c-supply",
+  [{x: E.months, y: E.active_restaurants, type: "scatter", mode: "lines+markers", line: {color: NAVY, width: 3}, name: T.l_active_rest}],
+  [{x: E.months, y: E.orders_per_restaurant, type: "scatter", mode: "lines+markers", line: {color: TEAL, width: 3}, name: T.l_orders_rest}],
+  [T.l_active_rest, T.l_orders_rest]);
+
+/* -------------------------------------------------------------- operations */
+const O = D.ops, H = O.heatmap, CS = O.city_scorecard;
+$("insight-operations").innerHTML = tpl(T.ins_operations, {
+  peak: O.peak_hours.slice().sort((a, b) => a - b).map(h => ltr(String(h).padStart(2, "0") + ":00")).join("، ".replace("،", FA ? "،" : ",")),
+  peak_share: ltr(pc(O.peak_3h_share_pct, 0)), ontime: ltr(pc(sc("on_time_rate"), 0)),
+  worst_city: nm(CS.names[CS.on_time_pct.indexOf(Math.min(...CS.on_time_pct))]), worst_ontime: ltr(pc(Math.min(...CS.on_time_pct), 0)),
+});
+miniTiles("ops-tiles", [
+  [T.o_peak, ltr(pc(O.peak_3h_share_pct, 0)), tpl(T.o_peak_sub, {h: O.peak_hours.slice().sort((a, b) => a - b).map(h => String(h).padStart(2, "0") + ":00").join(" · ")})],
+  [T.o_weekend, ltr(pc(O.weekend_share_pct, 1)), T.o_weekend_sub],
+  [T.o_holiday, ltr((O.holiday_lift_pct >= 0 ? "+" : "−") + nf(Math.abs(O.holiday_lift_pct), 1) + T.meta_pct), T.o_holiday_sub],
+  [T.o_eta, ltr(nf(O.avg_eta_error_minutes, 1) + " " + T.u_min), T.o_eta_sub],
+  [T.o_distance, ltr(nf(O.avg_distance_km, 2) + " " + T.u_km), T.o_distance_sub],
+]);
+plot("c-ontime", [{x: E.months, y: E.on_time_rate_pct, type: "scatter", mode: "lines+markers", line: {color: GREEN, width: 3}, name: T.c_ontime},
+                  {x: E.months, y: E.very_late_rate_pct, type: "scatter", mode: "lines+markers", line: {color: RED, width: 2, dash: "dot"}, name: T.l_very_late}],
+     {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, range: [0, 100]}, legend: {orientation: "h", y: -0.25}});
+plot("c-cancel", [{x: E.months, y: E.cancellation_rate_pct, type: "scatter", mode: "lines+markers", line: {color: RED, width: 3}, name: T.c_cancel},
+                  {x: E.months, y: E.refund_rate_pct, type: "scatter", mode: "lines+markers", line: {color: CAT[3], width: 2.5}, name: T.l_refund_rate}],
+     {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}, legend: {orientation: "h", y: -0.25}});
+plot("c-heatmap", [{
+  z: H.z, x: H.hours.map(h => String(h).padStart(2, "0")), y: H.days.map(d => T.days[d]), type: "heatmap",
+  colorscale: [[0, "#f1f8f8"], [1, "#0f7c82"]], zmin: 0, colorbar: {title: T.l_orders_day},
+  hovertemplate: "%{y} %{x}:00 — %{z:.1f} " + T.l_orders_day + "<extra></extra>",
+}], {xaxis: {title: T.l_hour, type: "category"}, yaxis: {autorange: "reversed"}, hovermode: "closest", margin: {l: 70, r: 10, t: 10, b: 50}});
+const CR = O.cancel_reasons;
+plot("c-cancel-reasons", [{
+  x: CR.per_100_orders, y: CR.names.map(nm), type: "bar", orientation: "h", marker: {color: CAT[1]},
+  text: CR.share_pct.map(v => nf(v, 0) + T.meta_pct), textposition: "outside", cliponaxis: false,
+  hovertemplate: "%{y}: %{x:.2f} / 100<extra></extra>",
+}], {xaxis: {title: T.l_per100, rangemode: "tozero"}, margin: {l: 150, r: 40, t: 10, b: 50}, hovermode: "closest", yaxis: {autorange: "reversed"}});
+
+(function () {
+  const cols = [
+    shadedCol(CS.on_time_pct, true, v => pc(v, 1)), shadedCol(CS.avg_delivery_minutes, false, v => nf(v, 1)),
+    shadedCol(CS.cancellation_rate_pct, false, v => pc(v, 1)), shadedCol(CS.rider_cost_per_order, false, v => money(v, 2)),
+    shadedCol(CS.contribution_per_order, true, v => money(v, 2)), shadedCol(CS.contribution_margin_pct, true, v => pc(v, 1)),
+  ];
+  const head = [T.h_city, T.h_orders, T.h_share, T.h_aov, T.h_ontime, T.h_deliv_min, T.h_cancel, T.h_rider_order, T.h_contrib_order, T.h_margin]
+    .map((h, i) => `<th class="${i ? "n" : ""}">${h}</th>`).join("");
+  const body = CS.names.map((n, i) => `<tr><td>${nm(n)}</td><td class="n">${ltr(nf(CS.orders[i]))}</td><td class="n">${ltr(pc(CS.share_pct[i], 1))}</td><td class="n">${ltr(money(CS.aov[i], 2))}</td>` +
+    cols.map(c => `<td class="n" ${c[i].attr}>${c[i].html}</td>`).join("") + "</tr>").join("");
+  $("tbl-city").innerHTML = `<table class="simple"><tr>${head}</tr>${body}</table>`;
+})();
+
+stacked2("c-rider",
+  [{x: E.months, y: E.rider_utilization_pct, type: "scatter", mode: "lines+markers", line: {color: NAVY, width: 3}, name: T.l_utilization}],
+  [{x: E.months, y: E.orders_per_rider_hour, type: "scatter", mode: "lines+markers", line: {color: TEAL, width: 3}, name: T.l_orders_hour}],
+  [T.l_utilization, T.l_orders_hour], {y1: {ticksuffix: T.meta_pct, rangemode: "tozero"}, y2: {rangemode: "tozero"}});
+const V = O.vehicle;
+table("tbl-vehicle", [T.h_vehicle, T.h_orders, T.h_share, T.h_rider_order, T.h_cost_km, T.h_deliv_min, T.h_ontime, T.h_util],
+  V.names.map((n, i) => [nm(n), ltr(nf(V.orders[i])), ltr(pc(V.share_pct[i], 1)), ltr(money(V.rider_cost_per_order[i], 2)), ltr(money(V.rider_cost_per_km[i], 2)),
+    ltr(nf(V.avg_delivery_minutes[i], 1)), ltr(pc(V.on_time_pct[i], 1)), ltr(pc(V.utilization_pct[i], 1))]), [1, 2, 3, 4, 5, 6, 7]);
+const DR = O.delay_rating;
+plot("c-delay-rating", [{
+  x: DR.buckets.map(nm), y: DR.avg_rating, type: "scatter", mode: "lines+markers+text", line: {color: NAVY, width: 3}, marker: {size: 9, color: [GREEN, TEAL, CAT[3], CAT[1], RED], line: {color: "#fff", width: 2}},
+  text: DR.avg_rating.map(v => nf(v, 2)), textposition: "top center", cliponaxis: false,
+  hovertemplate: "%{x}: %{y:.2f}<extra></extra>",
+}], {yaxis: {title: T.l_avg_rating, range: [4.0, 4.55]}, margin: {l: 56, r: 20, t: 20, b: 70}, xaxis: {tickangle: 0, automargin: true}, hovermode: "closest"});
+
+/* --------------------------------------------------------------- marketing */
+const M = D.marketing;
+$("insight-marketing").innerHTML = tpl(T.ins_marketing, {
+  paid: ltr(pc(M.paid_share_of_spend_pct, 0)), best: nm(M.channels.slice().sort((a, b) => M.ltv_to_cac_observed[b] - M.ltv_to_cac_observed[a])[0]),
+  best_ratio: ltr(nf(Math.max(...M.channels.map(c => M.ltv_to_cac_observed[c])), 1) + "x"),
+  ps: ltr(nf(M.ltv_to_cac_observed["Paid Social"], 2) + "x"), psr: ltr(nf(M.ltv_to_cac_observed["Paid Search"], 2) + "x"),
+  cac_up: ltr(nf((M.cac_observed_latest_3m["Paid Search"] / M.cac_assumed["Paid Search"] - 1) * 100, 0) + T.meta_pct),
+});
+miniTiles("mkt-tiles", [
+  [T.m_total_spend, ltr(money(M.total_spend_period, 0)), T.m_total_spend_sub],
+  [T.m_signups, ltr(nf(M.total_signups_period)), T.m_signups_sub],
+  [T.m_paid_share, ltr(pc(M.paid_share_of_spend_pct, 1)), T.m_paid_share_sub],
+  [T.m_promo_share, ltr(pc(M.promo.order_share_pct[0], 1)), tpl(T.m_promo_share_sub, {d: ltr(pc(M.promo.avg_discount_pct_of_food, 0))})],
+]);
+plot("c-spend-channel", M.channels.map((c, i) => ({
+  x: M.months, y: M.spend_by_channel[c], type: "bar", name: nm(c), marker: {color: CAT[i], line: {color: "#fff", width: 1}},
+})), {barmode: "stack", yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.28}});
+plot("c-cac-trend", [
+  {x: E.months, y: E.blended_cac, type: "scatter", mode: "lines+markers", name: T.l_blended_cac, line: {color: NAVY, width: 3}},
+], {yaxis: {title: T.l_usd_signup, rangemode: "tozero"}});
+plot("c-cac-compare", [
+  {x: M.channels.map(nm), y: M.channels.map(c => M.cac_assumed[c]), type: "bar", name: T.l_cac_assumed, marker: {color: MUTED}},
+  {x: M.channels.map(nm), y: M.channels.map(c => M.cac_observed_latest_3m[c]), type: "bar", name: T.l_cac_observed, marker: {color: CAT[1]}},
+], {barmode: "group", yaxis: {title: T.l_usd_signup}, xaxis: {tickangle: -20, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 80}, legend: {orientation: "h", y: -0.38}});
+const lc = M.channels.slice().sort((a, b) => M.ltv_to_cac_observed[b] - M.ltv_to_cac_observed[a]);
+plot("c-ltvcac", [{
+  x: lc.map(nm), y: lc.map(c => M.ltv_to_cac_observed[c]), type: "bar",
+  marker: {color: lc.map(c => M.ltv_to_cac_observed[c] >= 3 ? GREEN : M.ltv_to_cac_observed[c] >= 1 ? CAT[3] : RED)},
+  text: lc.map(c => nf(M.ltv_to_cac_observed[c], 2) + "x"), textposition: "outside", cliponaxis: false, hovermode: "closest",
+}], {yaxis: {title: "LTV : CAC", rangemode: "tozero"}, xaxis: {tickangle: -15, automargin: true}, shapes: [{type: "line", xref: "paper", x0: 0, x1: 1, y0: 1, y1: 1, line: {color: MUTED, width: 1.5, dash: "dash"}}], hovermode: "closest", margin: {l: 56, r: 20, t: 20, b: 70}});
+plot("c-discount", [
+  {x: E.months, y: E.promo_order_share_pct, type: "scatter", mode: "lines+markers", name: T.l_promo_orders, line: {color: CAT[3], width: 3}},
+  {x: E.months, y: E.promotion_cost_pct_revenue, type: "scatter", mode: "lines+markers", name: T.l_promo_rev, line: {color: RED, width: 3}},
+  {x: E.months, y: E.discount_rate_pct, type: "scatter", mode: "lines+markers", name: T.l_discount_gmv, line: {color: NAVY, width: 3}},
+], {yaxis: {title: T.meta_pct_axis, ticksuffix: T.meta_pct, rangemode: "tozero"}, legend: {orientation: "h", y: -0.3}});
+const PR = M.promo;
+table("tbl-promo", [T.h_metric, T.h_with_promo, T.h_no_promo], [
+  [T.h_order_share, ltr(pc(PR.order_share_pct[0], 1)), ltr(pc(PR.order_share_pct[1], 1))],
+  [T.h_aov, ltr(money(PR.aov[0], 2)), ltr(money(PR.aov[1], 2))],
+  [T.h_rev_order, ltr(money(PR.revenue_per_order[0], 2)), ltr(money(PR.revenue_per_order[1], 2))],
+  [T.h_contrib_order, ltr(money(PR.contribution_per_order[0], 2)), ltr(money(PR.contribution_per_order[1], 2))],
+  [T.h_promo_order, ltr(money(PR.promotion_cost_per_order[0], 2)), ltr(money(PR.promotion_cost_per_order[1], 2))],
+  [`<b>${T.h_after_promo}</b>`, `<b>${ltr(money(PR.contribution_after_promo_per_order[0], 2))}</b>`, `<b>${ltr(money(PR.contribution_after_promo_per_order[1], 2))}</b>`],
+], [1, 2]);
+
+/* ---------------------------------------------------------------- forecast */
+const fo = D.forecast.metrics.delivered_orders, hist = D.forecast.history_orders;
+$("insight-forecast").innerHTML = tpl(T.ins_forecast, {
+  model: nm(D.forecast.model_selection.delivered_orders), end: ltr(nf(Math.round(last(fo.point_forecast)))),
+});
+plot("c-forecast", [
+  {x: hist.months, y: hist.values, type: "scatter", mode: "lines", name: T.l_actuals, line: {color: NAVY, width: 3}},
+  {x: fo.months, y: fo.upper_80, type: "scatter", mode: "lines", name: T.l_upper80, line: {width: 0}, showlegend: false, hoverinfo: "skip"},
+  {x: fo.months, y: fo.lower_80, type: "scatter", mode: "lines", name: T.l_interval80, fill: "tonexty", fillcolor: "rgba(15,124,130,0.15)", line: {width: 0}},
+  {x: fo.months, y: fo.point_forecast, type: "scatter", mode: "lines+markers", name: T.l_forecast_base, line: {color: TEAL, width: 3, dash: "dot"}},
+], {yaxis: {title: T.l_orders}});
+table("table-models", [T.h_metric, T.h_selected_model, "WAPE", "MAPE"],
+  Object.entries(D.forecast.validation).map(([metric, rows]) => [nm(metric), nm(rows[0].model), ltr(pc(rows[0].wape * 100, 1)), ltr(pc(rows[0].mape * 100, 1))]), [2, 3]);
+const P = D.plan;
+const verdict = (T.verdicts && T.verdicts[P.verdict]) || P.verdict;
+$("plan-box").innerHTML = `<p><b>${T.l_verdict}:</b> ${verdict}</p>
+  <table class="simple">
+    <tr><td>${T.p_cur_orders}</td><td class="n">${ltr(nf(Math.round(P.current_orders_annualized)))}</td></tr>
+    <tr><td>${T.p_tgt_orders}</td><td class="n">${ltr(nf(Math.round(P.required_orders_annualized)))}</td></tr>
+    <tr><td>${T.p_cur_margin}</td><td class="n">${ltr(pc(P.current_margin_pct, 2))}</td></tr>
+    <tr><td>${T.p_tgt_margin}</td><td class="n">${ltr(pc(P.required_margin_pct, 2))}</td></tr>
+    <tr><td>${T.p_promo_burden}</td><td class="n">${ltr(pc(lastE("promotion_cost_pct_revenue"), 0))}</td></tr>
+  </table>`;
+
+/* ------------------------------------------------------------ optimization */
+const scnP = D.forecast.metrics.contribution_profit;
+plot("c-scenario", [
+  {x: scnP.months, y: scnP.downside_case, type: "scatter", mode: "lines", name: T.l_downside, line: {color: RED, dash: "dot", width: 2.5}},
+  {x: scnP.months, y: scnP.base_case, type: "scatter", mode: "lines", name: T.l_base, line: {color: NAVY, width: 3}},
+  {x: scnP.months, y: scnP.upside_case, type: "scatter", mode: "lines", name: T.l_upside, line: {color: GREEN, dash: "dot", width: 2.5}},
+], {yaxis: {title: T.l_profit_usd}});
+const oc = D.optimization.cells;
+const ocLabels = oc.labels.map(l => l.split(" / ").map(nm).join(" / "));
+plot("c-optimization", [
+  {x: ocLabels, y: oc.baseline_spend, type: "bar", name: T.l_baseline_spend, marker: {color: MUTED}},
+  {x: ocLabels, y: oc.optimized_spend, type: "bar", name: T.l_optimized_spend, marker: {color: TEAL}},
+], {barmode: "group", xaxis: {tickangle: -40, automargin: true}, margin: {l: 56, r: 20, t: 10, b: 130}, yaxis: {title: T.l_usd_month}, legend: {orientation: "h", y: -0.55}});
+const os_ = D.optimization.summary;
+$("opt-summary").innerHTML = tpl(T.ins_optimization, {
+  budget: fmtBudget(os_.total_budget), gain: ltr(nf(os_.gain_pct, 0) + T.meta_pct),
+  from: ltr(money(os_.baseline_incremental_profit, 0)), to: ltr(money(os_.optimized_incremental_profit, 0)),
+});
+function fmtBudget(v) { return ltr(money(v, 0)); }
+
+$("generated-at").innerHTML = tpl(T.generated_at, {d: ltr(D.generated_at)});
+
+/* scroll-spy nav */
+const sections = [...document.querySelectorAll("section")];
+const links = [...document.querySelectorAll("nav a")];
+window.addEventListener("scroll", () => {
+  let idx = 0; const y = window.scrollY + 90;
+  sections.forEach((s, i) => { if (s.offsetTop <= y) idx = i; });
+  links.forEach(l => l.classList.remove("active"));
+  if (links[idx]) links[idx].classList.add("active");
+});
+</script>
+</body>
+</html>

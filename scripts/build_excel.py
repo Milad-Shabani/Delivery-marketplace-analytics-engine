@@ -11,7 +11,7 @@ from openpyxl.formatting.rule import ColorScaleRule
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROC = os.path.join(ROOT, "data", "processed")
 RAW = os.path.join(ROOT, "data", "raw")
-OUT = os.path.join(ROOT, "outputs", "excel", "NOVAFOOD_Business_Analytics.xlsx")
+OUT = os.path.join(ROOT, "outputs", "excel", "Company1_Business_Analytics.xlsx")
 
 FONT = "Arial"
 NAVY = "1F2A44"
@@ -142,7 +142,7 @@ def main():
 
     # ---------------- Executive Summary ----------------
     ws = wb.create_sheet("Executive_Summary")
-    sheet_title(ws, "NOVAFOOD — Executive Summary", "Business Intelligence & Financial Planning Case Study | Synthetic data", width=8)
+    sheet_title(ws, "Company 1 — Executive Summary", "Business Intelligence & Financial Planning Case Study | Synthetic data", width=8)
     kpis = [
         ("GMV (trailing month)", f"${monthly.gmv.iloc[-1]:,.0f}"),
         ("Delivered Orders (trailing month)", f"{monthly.delivered_orders.iloc[-1]:,.0f}"),
@@ -162,7 +162,7 @@ def main():
     r += 1
     ws.cell(row=r, column=1, value="Central management question").font = LABEL_FONT
     r += 1
-    ws.cell(row=r, column=1, value="Can NOVAFOOD grow orders while improving contribution profit?").font = Font(name=FONT, italic=True, size=11)
+    ws.cell(row=r, column=1, value="Can Company 1 grow orders while improving contribution profit?").font = Font(name=FONT, italic=True, size=11)
     r += 2
     ws.cell(row=r, column=1, value="Strategic plan verdict (25% order growth, +2pp margin target)").font = LABEL_FONT
     r += 1
@@ -184,6 +184,36 @@ def main():
         r += 1
     ws.column_dimensions["A"].width = 46
     ws.column_dimensions["D"].width = 26
+
+    # ---------------- KPI Scorecard (v2) ----------------
+    i18n = json.load(open(os.path.join(ROOT, "src", "dashboard", "i18n", "en.json"), encoding="utf-8"))
+    with open(f"{PROC}/kpi_scorecard.json") as f:
+        scorecard = json.load(f)
+    rows = []
+    for g in scorecard["groups"]:
+        for it in g["items"]:
+            rows.append((i18n["grp_" + g["key"]], i18n["kpi_" + it["key"]], it["window"], it["value"], it["prev"], it["delta"],
+                         "pp" if it["delta_kind"] == "pp" else "%", {"up": "higher", "down": "lower", "neutral": "-"}[it["good"]],
+                         i18n["def_" + it["key"]]))
+    sc_df = pd.DataFrame(rows, columns=["group", "kpi", "window", "latest_month", "previous_month", "change", "change_unit", "good_direction", "definition"])
+    ws = wb.create_sheet("KPI_Scorecard")
+    sheet_title(ws, "Executive KPI Scorecard", f"{len(sc_df)} KPIs, {scorecard['as_of']} vs {scorecard['prev']}. Window 3M = trailing 3 months (sign-up-driven KPIs). Same numbers as the dashboard.", width=9)
+    write_df(ws, sc_df, 4, number_formats={"latest_month": "#,##0.00", "previous_month": "#,##0.00", "change": "0.0"})
+    for col, w in zip("ABCDEFGHI", (22, 30, 8, 14, 14, 10, 8, 10, 90)):
+        ws.column_dimensions[col].width = w
+
+    # ---------------- KPI Monthly (v2) ----------------
+    mx = pd.read_csv(f"{PROC}/kpi_monthly_extended.csv", parse_dates=["month"])
+    keep = ["month", "gmv", "delivered_orders", "active_customers", "orders_per_active_customer", "take_rate_pct", "contribution_profit_per_order",
+            "revenue_per_order", "cost_to_serve_per_order", "delivery_fee_coverage_pct", "promotion_cost_per_order", "promotion_cost_pct_revenue",
+            "contribution_after_promo", "contribution_after_promo_margin_pct", "activated_new_customers", "m1_retention_pct",
+            "subscriber_order_share_pct", "on_time_rate_pct", "very_late_rate_pct", "cancellation_rate_pct", "refund_rate_pct",
+            "active_restaurants", "orders_per_restaurant", "active_riders", "rider_utilization_pct", "orders_per_rider_hour",
+            "marketing_spend", "signups", "blended_cac", "marketing_pct_revenue", "discount_rate_pct", "gmv_yoy_pct"]
+    ws = wb.create_sheet("KPI_Monthly")
+    sheet_title(ws, "Monthly KPI Time Series", "Every monthly series behind the scorecard sparklines and the dashboard charts", width=len(keep))
+    write_df(ws, mx[keep].assign(**{c: mx[c].round(3) for c in keep if c != "month"}), 4, number_formats={c: "#,##0.00" for c in keep if c != "month"})
+    ws.column_dimensions["A"].width = 12
 
     # ---------------- Financials ----------------
     ws = wb.create_sheet("Financials")
@@ -357,6 +387,8 @@ def main():
         ("On-Time Rate", "Share of delivered orders with delivery_delay_minutes <= 5"),
         ("WAPE", "Weighted Absolute Percentage Error — sum(|error|) / sum(|actual|), used for forecast model selection"),
     ], columns=["kpi", "definition"])
+    kpi_defs = pd.concat([kpi_defs, sc_df[["kpi", "definition"]]], ignore_index=True).drop_duplicates("kpi")
+
     write_df(ws, kpi_defs, 4)
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
