@@ -25,11 +25,15 @@ jobs:
       - name: Run pipeline (generate + validate + analyze)
         run: python scripts/run_pipeline.py
 
+      - name: Build dashboard data
+        run: python scripts/build_dashboard_data.py
+
       - name: Run tests
         run: pytest tests/ -v
 
       - name: Build Excel workbook
         run: python scripts/build_excel.py
 
-      - name: Build dashboard data
-        run: python scripts/build_dashboard_data.py
+      - name: Build dashboards (English + Persian)
+        run: python scripts/build_dashboards.py
+
